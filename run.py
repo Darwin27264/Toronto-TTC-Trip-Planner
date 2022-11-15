@@ -1,4 +1,3 @@
-
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
 
@@ -8,6 +7,7 @@ config.sat_backend = "kissat"
 
 # Encoding that will store all of your constraints
 E = Encoding()
+
 
 # To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
 @proposition(E)
@@ -35,9 +35,10 @@ class FancyPropositions:
     def __repr__(self):
         return f"A.{self.data}"
 
+
 # Call your variables whatever you want
 a = BasicPropositions("a")
-b = BasicPropositions("b")   
+b = BasicPropositions("b")
 c = BasicPropositions("c")
 d = BasicPropositions("d")
 e = BasicPropositions("e")
