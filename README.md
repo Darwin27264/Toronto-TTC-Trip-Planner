@@ -1,4 +1,4 @@
-# Toronto-CTC-Trip-Planner
+# Toronto CTC Trip Planner
 
 CISC/CMPE 204 Modelling Project - 2022 - Group 12
 
