@@ -90,6 +90,8 @@ def example_theory():
 
 if __name__ == "__main__":
 
+    print("test")
+
     T = example_theory()
     # Don't compile until you're finished adding all your constraints!
     T = T.compile()
