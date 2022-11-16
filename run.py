@@ -74,6 +74,7 @@ z = FancyPropositions("z")
 def example_theory():
     # User must be fall into one of the age groups below
     E.add_constraint(adult | youth | senior | kid)
+    #first test
 
     # Add custom constraints by creating formulas with the variables you created. 
     E.add_constraint((a | b) & ~x)
