@@ -3,6 +3,8 @@ from bauhaus.utils import count_solutions, likelihood
 
 # These two lines make sure a faster SAT solver is used.
 from nnf import config
+from nnf import Var
+
 config.sat_backend = "kissat"
 
 # Encoding that will store all of your constraints
@@ -36,7 +38,23 @@ class FancyPropositions:
         return f"A.{self.data}"
 
 
-# Call your variables whatever you want
+# Budget/Price
+kid = Var('kids/children')
+adult = Var('adult')
+youth = Var('youth')
+senior = Var('senior')
+presto = Var('presto user')
+presto_adult = Var('presto user (adult)')
+presto_youth = Var('presto user (youth)')
+presto_senior = Var('presto user (senior)')
+presto_day_pass = Var('buy presto day pass')
+surpass_day_pass = Var('cheaper to go with day pass')
+# Time
+within_time_constraint = Var('within time constraint')
+rush_hour = Var('rush hour')
+# Additional Stops Requested
+additional_stops = Var('additional stops')
+
 a = BasicPropositions("a")
 b = BasicPropositions("b")
 c = BasicPropositions("c")
@@ -54,8 +72,12 @@ z = FancyPropositions("z")
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
 def example_theory():
+    # User must be fall into one of the age groups below
+    E.add_constraint(adult | youth | senior | kid)
+
     # Add custom constraints by creating formulas with the variables you created. 
     E.add_constraint((a | b) & ~x)
+
     # Implication
     E.add_constraint(y >> z)
     # Negate a formula
@@ -79,7 +101,7 @@ if __name__ == "__main__":
     print("   Solution: %s" % T.solve())
 
     print("\nVariable likelihoods:")
-    for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
+    for v, vn in zip([a, b, c, x, y, z], 'abcxyz'):
         # Ensure that you only send these functions NNF formulas
         # Literals are compiled to NNF here
         print(" %s: %.2f" % (vn, likelihood(T, v)))
