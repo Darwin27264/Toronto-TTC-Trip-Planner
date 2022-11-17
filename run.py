@@ -112,7 +112,6 @@ def example_theory():
 
 def get_input():
     """
-
     Get initial user input.
 
     User will input their starting location, desired ending location,
