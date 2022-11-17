@@ -1,6 +1,16 @@
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
 
+# Some custom imports including time, SQLite
+from datetime import datetime
+import sqlite3
+import json
+
+# Importing databasez
+from trips import Trips
+from routes import Routes
+from stops import Stops
+
 # These two lines make sure a faster SAT solver is used.
 from nnf import config
 from nnf import Var
@@ -87,7 +97,44 @@ def example_theory():
 
     return E
 
+def get_input():
+    """
 
+    Get initial user input.
+
+    User will input their starting location, desired ending location,
+    current time, desired arrival time, travel budget, age, extra
+    visiting locations.
+
+    :return:
+    origin - string - starting location
+    destination - string - final destination
+    time_now - string - current time (system time)
+    arrival_time - string - time the user wishes to arrive at
+    age - int - user age
+    additional_stops - Python array - array of extra stop
+    """
+
+    origin = input("Welcome to the Toronto CTC Trip Planner, enter your starting stop: ")
+    destination = input("Now enter your destination: ")
+
+
+    now = datetime.now()
+
+    current_time = now.strftime("%H:%M:%S")
+    print("Current Time =", current_time)
+
+    return origin, destination,
+
+
+def main():
+    print("test")
+
+
+main()
+
+
+''' Original Test Main
 if __name__ == "__main__":
 
     print("test")
@@ -107,3 +154,4 @@ if __name__ == "__main__":
         # Literals are compiled to NNF here
         print(" %s: %.2f" % (vn, likelihood(T, v)))
     print()
+'''
