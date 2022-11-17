@@ -97,6 +97,7 @@ def example_theory():
 
     return E
 
+
 def get_input():
     """
 
@@ -112,19 +113,49 @@ def get_input():
     time_now - string - current time (system time)
     arrival_time - string - time the user wishes to arrive at
     age - int - user age
-    additional_stops - Python array - array of extra stop
+    additional_stops_list - Python array - array of extra stop
     """
 
-    origin = input("Welcome to the Toronto CTC Trip Planner, enter your starting stop: ")
-    destination = input("Now enter your destination: ")
+    additional_stops_list = []
 
+    origin = input("Welcome to the Toronto CTC Trip Planner, let's start by entering your starting stop: ")
+    destination = input("\nNow enter your destination: ")
 
+    # Getting current time
     now = datetime.now()
+    time_now = now.strftime("%H:%M")
+    print("\nCurrent Time:", time_now)
 
-    current_time = now.strftime("%H:%M:%S")
-    print("Current Time =", current_time)
+    # The time user wants to get to the final destination by
 
-    return origin, destination,
+    # user's additional stops shouldn't exceed this time, need a constraint for this
+    arrival_time = input("\nNow enter the time you wish to arrive at your final destination by (HH:MM): ")
+
+    age = input("\nEnter your age (for trip price calculation): ")
+
+    # Ask if there will be any additional stops first, will return an empty
+    # additional_stops array if user chooses no
+    more_stops = input("\nWould you like to take any additional stops \nin between your starting "
+                       "location and final destination? (Y/N): ")
+
+    if more_stops.capitalize() == "Y":
+        print("\nEnter the additional stops below, once you are done, \nsimply hit *enter* again to record "
+              "all the stops.")
+
+        counter = 0
+
+        # Emulating a do while loop
+        while True:
+            counter += 1
+
+            add_stops = input("\nEnter additional stop #" + str(counter) + ":")
+
+            if add_stops != "":
+                additional_stops_list.append(add_stops)
+            else:
+                break
+
+    return origin, destination, time_now, arrival_time, int(age), additional_stops_list
 
 
 def main():
@@ -132,7 +163,6 @@ def main():
 
 
 main()
-
 
 ''' Original Test Main
 if __name__ == "__main__":
