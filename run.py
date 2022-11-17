@@ -7,6 +7,10 @@ import sqlite3
 import json
 import os.path
 
+# Get user location using geopy
+# importing geopy library
+from geopy.geocoders import Nominatim
+
 # Importing database
 # from trips import Trips
 # from routes import Routes
@@ -77,15 +81,11 @@ presto_senior = BasicPropositions('presto user (senior)')
 presto_day_pass = BasicPropositions('buy presto day pass')
 surpass_day_pass = BasicPropositions('cheaper to go with day pass')
 
-a = BasicPropositions("a")
-b = BasicPropositions("b")
-c = BasicPropositions("c")
-d = BasicPropositions("d")
-e = BasicPropositions("e")
-# At least one of these will be true
-x = FancyPropositions("x")
-y = FancyPropositions("y")
-z = FancyPropositions("z")
+# Time
+within_time_constraint = BasicPropositions('within time constraint')
+rush_hour = BasicPropositions('rush hour')
+# Additional Stops Requested
+additional_stops = BasicPropositions('additional stops')
 
 
 # Build an example full theory for your setting and return it.
@@ -119,17 +119,42 @@ def get_input():
     visiting locations.
 
     :return:
-    origin - string - starting location
+    origin_coords - tuple - starting location coordinates (lon, lat)
+
     destination - string - final destination
     time_now - string - current time (system time)
     arrival_time - string - time the user wishes to arrive at
+
     age - int - user age
+
     additional_stops_list - Python array - array of extra stop
+    desired_stops_time - Python array - array of amount time spent at each additional stops
+
+    Note: the lists will still be returned if empty
     """
 
-    additional_stops_list = []
+    # Geopy preloading
+    loc = Nominatim(user_agent="GetLoc")
 
-    origin = input("Welcome to the Toronto CTC Trip Planner, let's start by entering your starting stop: ")
+    # Defining variables
+    additional_stops_list = []
+    desired_stops_time = []
+
+    origin = input("Welcome to the Toronto CTC Trip Planner, let's start by entering your starting stop \n"
+                   "(the street you are currently on or looking to leave from, for example: Yonge Street): ")
+
+    # entering the location name
+    getLoc = loc.geocode(origin)
+
+    # printing address
+    print("Ok, you will be leaving from: " + getLoc.address)
+
+    # printing latitude and longitude
+    print("Latitude = ", getLoc.latitude, "\n")
+    print("Longitude = ", getLoc.longitude)
+
+    origin_coords = (getLoc.longitude, getLoc.latitude)
+
     destination = input("\nNow enter your destination: ")
 
     # Getting current time
@@ -166,7 +191,13 @@ def get_input():
             else:
                 break
 
-    return origin, destination, time_now, arrival_time, int(age), additional_stops_list
+        print("\nNow enter the amount of time you wish to stay at for each "
+              "\nof the additional stops you have inputted: ")
+
+        for i in additional_stops_list:
+            desired_stops_time = input("Amount of time you wish to stop for at " + i + ": ")
+
+    return origin_coords, destination, time_now, arrival_time, int(age), additional_stops_list, desired_stops_time
 
 
 def main():
