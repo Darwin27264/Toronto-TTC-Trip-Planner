@@ -157,7 +157,7 @@ def get_input():
 
     destination = input("\nNow enter your destination: ")
 
-    # Getting current time
+    # Getting current time (device time)
     now = datetime.now()
     time_now = now.strftime("%H:%M")
     print("\nCurrent Time:", time_now)
