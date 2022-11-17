@@ -48,22 +48,33 @@ class FancyPropositions:
         return f"A.{self.data}"
 
 
-# Budget/Price
-kid = Var('kids/children')
-adult = Var('adult')
-youth = Var('youth')
-senior = Var('senior')
-presto = Var('presto user')
-presto_adult = Var('presto user (adult)')
-presto_youth = Var('presto user (youth)')
-presto_senior = Var('presto user (senior)')
-presto_day_pass = Var('buy presto day pass')
-surpass_day_pass = Var('cheaper to go with day pass')
-# Time
-within_time_constraint = Var('within time constraint')
-rush_hour = Var('rush hour')
-# Additional Stops Requested
-additional_stops = Var('additional stops')
+# # Budget/Price
+# kid = Var('kids/children')
+# adult = Var('adult')
+# youth = Var('youth')
+# senior = Var('senior')
+# presto = Var('presto user')
+# presto_adult = Var('presto user (adult)')
+# presto_youth = Var('presto user (youth)')
+# presto_senior = Var('presto user (senior)')
+# presto_day_pass = Var('buy presto day pass')
+# surpass_day_pass = Var('cheaper to go with day pass')
+# # Time
+# within_time_constraint = Var('within time constraint')
+# rush_hour = Var('rush hour')
+# # Additional Stops Requested
+# additional_stops = Var('additional stops')
+
+kid = BasicPropositions('kids/children')
+adult = BasicPropositions('adult')
+youth = BasicPropositions('youth')
+senior = BasicPropositions('senior')
+presto = BasicPropositions('presto user')
+presto_adult = BasicPropositions('presto user (adult)')
+presto_youth = BasicPropositions('presto user (youth)')
+presto_senior = BasicPropositions('presto user (senior)')
+presto_day_pass = BasicPropositions('buy presto day pass')
+surpass_day_pass = BasicPropositions('cheaper to go with day pass')
 
 a = BasicPropositions("a")
 b = BasicPropositions("b")
@@ -83,7 +94,7 @@ z = FancyPropositions("z")
 #  what the expectations are.
 def example_theory():
     # User must be fall into one of the age groups
-    # E.add_constraint(adult | youth | senior | kid)
+    E.add_constraint(adult | youth | senior | kid)
 
     # Add custom constraints by creating formulas with the variables you created. 
     E.add_constraint((a | b) & ~x)
