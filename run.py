@@ -1,15 +1,16 @@
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import count_solutions, likelihood
 
-# Some custom imports including time, SQLite
+# Some custom imports including time, SQLite， unzipper
 from datetime import datetime
 import sqlite3
 import json
+import os.path
 
 # Importing database
-from trips import Trips
-from routes import Routes
-from stops import Stops
+# from trips import Trips
+# from routes import Routes
+# from stops import Stops
 
 # These two lines make sure a faster SAT solver is used.
 from nnf import config
