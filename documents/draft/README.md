@@ -4,6 +4,14 @@ As an ungraded draft submission, you are expected to submit a draft of your proj
 
 While a grade will not be assigned, failing to submit this draft may result in poor performance in your final grade, as you will miss out on the critical feedback from both your peers and teaching staff.
 
+Some supplimentry documentations can be found in the Google Docs link blow.
+
+Project Algorithm Outline:
+https://docs.google.com/document/d/1lftKjgEprV1gSGrZ1DGcnWc-yj5c-bPfTPuW3X0-OD0/edit?usp=sharing
+
+Project Draft Documentation:
+https://docs.google.com/document/d/1FDPtGpKazoLGV735bDrxHTdggzE6yb0LyAhey9wyT14/edit?usp=sharing
+
 ## Expected Items
 
 * *this repository*: We will download the most recent version of your project (including this folder) on the due date.
