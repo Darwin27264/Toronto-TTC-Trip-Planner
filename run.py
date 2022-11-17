@@ -6,7 +6,7 @@ from datetime import datetime
 import sqlite3
 import json
 
-# Importing databasez
+# Importing database
 from trips import Trips
 from routes import Routes
 from stops import Stops
