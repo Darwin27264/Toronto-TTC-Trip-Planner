@@ -1,8 +1,8 @@
-# Toronto CTC Trip Planner
+# Toronto TTC Trip Planner
 
 CISC/CMPE 204 Modelling Project - 2022 - Group 12
 
-Using data set provided by transitfeeds.com, our program aims to evaluate and provide the most optimal ways one can get from one point to another within Toronto, using just the CTC public transport system. Our project takes into consideration many different variables including transfers, budget, time constraints, etc, and finds the optimal route using propostional logic. 
+Using data set provided by transitfeeds.com, our program aims to evaluate and provide the most optimal ways one can get from one point to another within Toronto, using just the TTC public transport system. Our project takes into consideration many different variables including transfers, budget, time constraints, etc, and finds the optimal route using propostional logic. 
 
 As the user you will input your starting location, desired ending location, current time, desired arrival time, travel budget, age, extra visiting locations (eg. Toronto Zoo), and other miscellaneous options. 
 
