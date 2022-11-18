@@ -309,8 +309,10 @@ def find_closest_stop(location):
 
 
 def main():
-    print(get_input())
-
+    test_array = get_input()
+    print(test_array[0])
+    # print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
+    print(find_closest_stop(test_array[0]))
 
 main()
 
