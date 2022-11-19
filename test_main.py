@@ -179,7 +179,7 @@ def get_location(str):
         input_method = input("Your input methods are: \n"
                     "(1) Address/General Location (Example: Yonge St, Zoo, 382 Yonge St, etc...)\n"
                     "(2) Exact Stop Names from TTC Website\n"
-                    "(3) (Latitude, Longitude)\n")
+                    "(3) (Latitude, Longitude)\n\nEnter 1, 2 or 3 to select: ")
         if input_method == '1' or input_method=='2' or input_method=='3':
             input_valid = True
         else:
@@ -212,26 +212,81 @@ def call_get_location(msg1, msg2):
             else:
                 origin_coords=get_location(msg1)
 
-        starting_stop = find_closest_stop(origin_coords)
-        s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': starting_stop})
-        starting_stop_name = s.fetchall()
-        print("\n" + str(starting_stop_name[0][1]) + " --- StopID: " + str(starting_stop_name[0][0]) + "\n")
-        correct=input(msg2)
+        stop = find_closest_stop(origin_coords)
+        s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop})
+        stop_name = s.fetchall()
+        print("\n" + str(stop_name[0][1]) + " --- StopID: " + str(stop_name[0][0]) + "\n")
         valid = False
         while valid == False:
+            correct=input(msg2)
             if(correct=="y" or correct=="n" or correct=="Y" or correct=="N"):
                 valid = True
             else:
                 os.system('cls')
-                print("Please enter Y or N\n")
-                print("\n" + str(starting_stop_name[0][1]) + " --- StopID: " + str(starting_stop_name[0][0] + "\n"))
+                print("Please enter Y or N")
+                print("\n" + str(stop_name[0][1]) + " --- StopID: " + str(stop_name[0][0]) + "\n")
         if correct == 'y' or correct == "Y":
             correct_stop = True
-            return starting_stop_name[0][0]
+            return stop_name[0][0]
         elif correct == 'n' or correct == "N":
             os.system('cls')
             print("Try a different method\n")
-    
+
+
+def validate_time():
+    validTime = False
+    while validTime==False:
+        time = input("Enter the time you wish to leave by (HH:MM): ")
+        time = time.replace("(","").replace(")","").replace(" ","")
+        if len(time)==5 and ":" in time:
+            hours, mins = time.split(":")[0], time.split(":")[1]
+            if hours.isnumeric()==False:
+                os.system('cls')
+                print("Hours must be numeric\n")
+            elif 0 > int(hours) or  int(hours) > 23:
+                os.system('cls')
+                print("Hours must be between 0 and 23\n")
+            elif mins.isnumeric()==False:
+                os.system('cls')
+                print("Hours must be numeric\n")
+            elif 0 > int(mins) or  int(mins) > 59:
+                os.system('cls')
+                print("Hours must be between 0 and 59\n")
+            else:
+                validTime=True
+        else:
+            os.system('cls')
+            print("Please write in format (HH:MM)\n")
+    return (int(hours),int(mins))
+                
+
+def get_time(str):
+    print(str)
+    validInput = False
+    while validInput==False:
+        timeinput = input("(1) Current Time\n(2) Specific Time\n\nEnter 1 or 2 to select: ")
+        os.system('cls')
+        if timeinput=="1" or timeinput=="2":
+            validInput=True
+        else:
+            print("Please enter either 1 or 2\n")
+    if timeinput=="1":
+        now = datetime.now()
+        time = now.strftime("%H:%M")
+        hours, mins = time.split(":")[0], time.split(":")[1]
+        return (int(hours),int(mins)) 
+    elif timeinput=="2":
+        time = validate_time()
+    return time
+                    
+def check_time_after(starting, ending):
+    if starting[0] > ending[0]:
+        return False
+    if starting[0] == ending[1]:
+        if starting[1] >= ending[1]:
+            return False        
+    return True
+
 
 def get_input():
     """
@@ -275,17 +330,30 @@ def get_input():
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': destination})
     ending_stop_name = s.fetchone()
     
-    print("\n" + str(starting_stop_name[1]) + " ------> " + str(ending_stop_name[1]))
-    
     # Getting current time
-    now = datetime.now()
-    time_now = now.strftime("%H:%M")
-    print("\nCurrent Time:", time_now)
+    os.system('cls')
+    print("Now let's get your trip's starting time\n")
+    starting_time = get_time("Would you like to use the current time or indicate a specific time?")
 
     # The time user wants to get to the final destination by
 
     # user's additional stops shouldn't exceed this time, need a constraint for this
-    arrival_time = input("\nNow enter the time you wish to arrive at your final destination by (HH:MM): ")
+    os.system('cls')
+    print("Now let's get your trip's ending time\n")
+    valid_Time = False
+    while valid_Time==False:
+        ending_time = validate_time()
+        if check_time_after(starting_time,ending_time):
+            valid_Time = True
+        else:
+            os.system('cls')
+            print("Ending time must be after starting time and within the same day\n")
+        
+    
+    print("\n" + str(starting_stop_name[1]) + " " + str(starting_time[0]) + 
+          ":" + str(starting_time[1]) + " ------> " + str(ending_stop_name[1])+ " " + str(ending_time[0]) + 
+          ":" + str(ending_time[1]))
+    
 
     age = input("\nEnter your age (for trip price calculation): ")
 
