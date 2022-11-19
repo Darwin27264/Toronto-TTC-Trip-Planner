@@ -153,10 +153,10 @@ def get_input():
     desired_stops_time = []
 
     input_method = input("Welcome to the Toronto TTC Trip Planner, let's start by entering your starting stop \n"
-                   "Your input methods are: \n"
-                   "(1) Address/General Location (Example: Yonge St, Zoo, 382 Yonge St, etc...)\n"
-                   "(2) Exact Stop Names from TTC Website\n"
-                   "(3) (Latitude, Longitude)\n")
+                         "Your input methods are: \n"
+                         "(1) Address/General Location (Example: Yonge St, Zoo, 382 Yonge St, etc...)\n"
+                         "(2) Exact Stop Names from TTC Website\n"
+                         "(3) (Latitude, Longitude)\n")
 
     if int(input_method) == 1:
         origin = input("Enter the location you wish to leave from: ")
@@ -313,6 +313,7 @@ def main():
     print(test_array[0])
     # print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
     print(find_closest_stop(test_array[0]))
+
 
 main()
 
