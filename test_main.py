@@ -219,24 +219,24 @@ def call_get_location(msg1, msg2):
         valid = False
         while valid == False:
             correct=input(msg2)
-            if(correct=="y" or correct=="n" or correct=="Y" or correct=="N"):
+            if correct.upper()=="Y" or correct.upper()=="N":
                 valid = True
             else:
                 os.system('cls')
                 print("Please enter Y or N")
                 print("\n" + str(stop_name[0][1]) + " --- StopID: " + str(stop_name[0][0]) + "\n")
-        if correct == 'y' or correct == "Y":
+        if correct.upper() == "Y":
             correct_stop = True
             return stop_name[0][0]
-        elif correct == 'n' or correct == "N":
+        elif correct.upper()== "N":
             os.system('cls')
             print("Try a different method\n")
 
 
-def validate_time():
+def validate_time(msg):
     validTime = False
     while validTime==False:
-        time = input("Enter the time you wish to leave by (HH:MM): ")
+        time = input(msg)
         time = time.replace("(","").replace(")","").replace(" ","")
         if len(time)==5 and ":" in time:
             hours, mins = time.split(":")[0], time.split(":")[1]
@@ -260,7 +260,7 @@ def validate_time():
     return (int(hours),int(mins))
                 
 
-def get_time(str):
+def get_start_time(str):
     print(str)
     validInput = False
     while validInput==False:
@@ -276,9 +276,29 @@ def get_time(str):
         hours, mins = time.split(":")[0], time.split(":")[1]
         return (int(hours),int(mins)) 
     elif timeinput=="2":
-        time = validate_time()
+        string = "Enter the time you wish to leave by (HH:MM): "
+        time = validate_time(string)
     return time
+
+def get_end_time(starting_time,msg, msg1):
+    valid_Time = False
+    while valid_Time==False:
+        ending_time = validate_time(msg1)
+        if check_time_after(starting_time,ending_time):
+            valid_Time = True
+        else:
+            os.system('cls')
+            print(msg)
+    return ending_time
                     
+def check_time_before(starting, ending):
+    if starting[0] < ending[0]:
+        return False
+    if starting[0] == ending[1]:
+        if starting[1] <= ending[1]:
+            return False        
+    return True
+
 def check_time_after(starting, ending):
     if starting[0] > ending[0]:
         return False
@@ -286,6 +306,110 @@ def check_time_after(starting, ending):
         if starting[1] >= ending[1]:
             return False        
     return True
+
+def get_age():
+    valid_Age = False
+    while valid_Age==False:
+        age = input("Enter your age (for trip price calculation): ")
+        if age.isnumeric()==False:
+            os.system('cls')
+            print("Input must be a number\n")
+        elif float(age) % 1 != 0:
+            os.system('cls')
+            print("Input must be an integer\n")
+        else:
+            valid_Age = True
+    return age
+
+def get_presto():
+    valid_Presto = False
+    while valid_Presto==False:
+        presto = input("Do you have a presto card? (Y/N): ")
+        if presto.upper() == "Y"  or presto.upper() == "N" :
+            valid_Presto=True
+        else:
+            os.system('cls')
+            print("Please enter either Y or N\n")
+    if presto.upper() == "Y":
+        return True
+    elif presto.upper() == "N":
+        return False
+
+def get_budget():
+    valid_Budget = False
+    while valid_Budget==False:
+        budget = input("Enter your spending budget: ")
+        budget = budget.replace("$","").replace(" ","")
+        if budget.isnumeric()==False:
+            os.system('cls')
+            print("Budget must be a number\n")
+        elif float(budget)<=0:
+            os.system('cls')
+            print("Budget must be more than 0\n")
+        else:
+            valid_Budget=True
+    return budget
+
+def get_additional_stops(start_time,end_time):
+    additional_stops = []
+    start_time_var = start_time
+    valid_Ans = False
+    while valid_Ans == False:
+        more_stops = input("Would you like to take any additional stops \nin between your starting "
+                        "location and final destination? (Y/N): ")
+        if more_stops.upper() == "Y"  or more_stops.upper() == "N" :
+            valid_Ans=True
+        else:
+            os.system('cls')
+            print("Please enter either Y or N\n")
+    if more_stops.upper() == "Y":
+        more = False
+        while more==False:
+            stop_message1="Let's find your additional stop \n"
+            stop_message2="Is this the stop want to go to? (Y/N): "
+            stop_id = call_get_location(stop_message1,stop_message2)
+            string = "Enter the time you wish to arrive at your stop (HH:MM): "
+            time = get_end_time(start_time_var,"Stop time must be after the previous stop time\n", string)
+            no_overflow=False
+            while no_overflow==False:
+                no_exceed_time = False
+                while no_exceed_time == False:
+                    staytime = validate_time("\nHow long do you want to stay at this stop?\
+                                                (HH:MM)(Example: 2 hours and 30 minutes --> (02:30)): ")
+                    if check_time_before(staytime,end_time):
+                        no_exceed_time = True
+                    else:
+                        os.system('cls')
+                        print("Cannot visit stop after ending stop\n")
+                minutes = time[1]+staytime[1]
+                hours = time[0]+ (minutes//60)
+                if hours>=24:
+                    os.system('cls')
+                    print("Cannot stay at stop until next day\n")
+                else:
+                    leave_time = (hours,minutes%60)
+                    if check_time_before(leave_time,end_time):
+                        no_overflow = True
+                    else:
+                        os.system('cls')
+                        print("Cannot stay at stop until after ending stop time\n")
+            additional_stops.append(stop_id,(time,leave_time))
+            valid_another = False
+            while valid_another == False:
+                another = input("\nWould you like to add another stop? (Y/N): ")
+                if another.upper() == "Y"  or another.upper() == "N" :
+                    valid_another=True
+                else:
+                    os.system('cls')
+                    print("Please enter either Y or N\n")
+            if another.upper() == "N":
+                more = True
+            else:
+                start_time_var = leave_time
+    elif more_stops.upper() == "N":
+        return additional_stops
+    return additional_stops
+
 
 
 def get_input():
@@ -311,10 +435,6 @@ def get_input():
     Note: the lists will still be returned if empty
     """
 
-    # Defining variables
-    additional_stops_list = []
-    desired_stops_time = []
-
     # Gets the stop id of the current stop that the user is at
     start_message1="Welcome to the Toronto TTC Trip Planner, let's start by entering your starting stop \n"
     start_message2="Is this the stop you are currently at? (Y/N): "
@@ -333,59 +453,34 @@ def get_input():
     # Getting current time
     os.system('cls')
     print("Now let's get your trip's starting time\n")
-    starting_time = get_time("Would you like to use the current time or indicate a specific time?")
+    starting_time = get_start_time("Would you like to use the current time or indicate a specific time?")
 
     # The time user wants to get to the final destination by
 
     # user's additional stops shouldn't exceed this time, need a constraint for this
     os.system('cls')
     print("Now let's get your trip's ending time\n")
-    valid_Time = False
-    while valid_Time==False:
-        ending_time = validate_time()
-        if check_time_after(starting_time,ending_time):
-            valid_Time = True
-        else:
-            os.system('cls')
-            print("Ending time must be after starting time and within the same day\n")
-        
+    string = "Ending time must be after starting time and within the same day\n"
+    string2 = "Enter the time you wish to arrive at your destination (HH:MM): "
+    ending_time = get_end_time(starting_time, string, string2)
+    
+    os.system('cls')
+    age = get_age()
+            
+    os.system('cls')
+    hasPresto = get_presto()
+    
+    os.system('cls')
+    budget = get_budget()
+    
+    os.system('cls')
+    additional_stops_list = get_additional_stops(starting_time,ending_time)
     
     print("\n" + str(starting_stop_name[1]) + " " + str(starting_time[0]) + 
-          ":" + str(starting_time[1]) + " ------> " + str(ending_stop_name[1])+ " " + str(ending_time[0]) + 
-          ":" + str(ending_time[1]))
-    
+        ":" + str(starting_time[1]) + " ------> " + str(ending_stop_name[1])+ " " + str(ending_time[0]) + 
+        ":" + str(ending_time[1]))
 
-    age = input("\nEnter your age (for trip price calculation): ")
-
-    # Ask if there will be any additional stops first, will return an empty
-    # additional_stops array if user chooses no
-    more_stops = input("\nWould you like to take any additional stops \nin between your starting "
-                       "location and final destination? (Y/N): ")
-
-    if more_stops.capitalize() == "Y":
-        print("\nEnter the additional stops below, once you are done, \nsimply hit *enter* again to record "
-              "all the stops.")
-
-        counter = 0
-
-        # Emulating a do while loop
-        while True:
-            counter += 1
-
-            add_stops = input("\nEnter additional stop #" + str(counter) + ":")
-
-            if add_stops != "":
-                additional_stops_list.append(add_stops)
-            else:
-                break
-
-        print("\nNow enter the amount of time you wish to stay at for each "
-              "\nof the additional stops you have inputted: ")
-
-        for i in additional_stops_list:
-            desired_stops_time = input("Amount of time you wish to stop for at " + i + ": ")
-
-    return start, destination, time_now, arrival_time, int(age), additional_stops_list, desired_stops_time
+    return (start,starting_time) , (destination, ending_time), int(age), hasPresto, budget, additional_stops_list
 
 
 # Clear terminal
