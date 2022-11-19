@@ -41,6 +41,15 @@ def find_closest_stop(location):
 
     return min_stop_id
 
+def print_address(address):
+    # printing address
+    print("\nLocation Address: " + address.address)
+
+    # printing latitude and longitude
+    print("\nLatitude: ", address.latitude, "")
+    print("Longitude: ", address.longitude)
+
+
 def get_location_1():
     # Geopy preloading
     loc = Nominatim(user_agent="GetLoc")
@@ -50,31 +59,41 @@ def get_location_1():
     min_lat = 43.591811
     min_lon = -79.649908
     
-    origin = input("Enter the location you wish to leave from: ")
+    origin = input("Enter the location (Example: Yonge St, Zoo, 382 Yonge St, etc...): ")
     # entering the location name
     getLoc_no_toronto = loc.geocode(origin)
     getLoc_toronto = loc.geocode(origin + " Toronto")
 
-    if getLoc_no_toronto is None or getLoc_toronto is None:
+    if getLoc_toronto is None and getLoc_no_toronto is None:
         print("\nLocation is not found!\n")
         return False
-            # While loop is needed here
-
-    else:
+    elif getLoc_toronto is None:
+        within_bound_no_toronto = min_lat <= getLoc_no_toronto.latitude <= max_lat and min_lon <= \
+            getLoc_no_toronto.longitude <= max_lon
+        if within_bound_no_toronto==True:
+            print_address(getLoc_no_toronto)
+            origin_coords = (getLoc_no_toronto.latitude, getLoc_no_toronto.longitude)
+        else:
+            print("\nLocation is not in Toronto!\n")
+            return False
+    elif getLoc_no_toronto is None:
+        within_bound_toronto = min_lat <= getLoc_toronto.latitude <= max_lat and min_lon <= \
+        getLoc_toronto.longitude <= max_lon
+        if within_bound_toronto==True:
+            print_address(getLoc_toronto)
+            origin_coords = (getLoc_toronto.latitude, getLoc_toronto.longitude)
+        else:
+            print("\nLocation is not in Toronto!\n")
+            return False
+    elif getLoc_toronto != None and getLoc_no_toronto != None:
         within_bound_no_toronto = min_lat <= getLoc_no_toronto.latitude <= max_lat and min_lon <= \
             getLoc_no_toronto.longitude <= max_lon
         within_bound_toronto = min_lat <= getLoc_toronto.latitude <= max_lat and min_lon <= \
             getLoc_toronto.longitude <= max_lon
-
         if getLoc_toronto.address == getLoc_no_toronto.address:
             if within_bound_no_toronto and within_bound_toronto:
                 # printing address
-                print("Ok, you will be leaving from: " + getLoc_no_toronto.address)
-
-                # printing latitude and longitude
-                print("\nLatitude: ", getLoc_no_toronto.latitude, "")
-                print("Longitude: ", getLoc_no_toronto.longitude)
-
+                print_address(getLoc_no_toronto)
                 origin_coords = (getLoc_no_toronto.latitude, getLoc_no_toronto.longitude)
             else:
                 print("\nLocation is not in Toronto!\n")
@@ -83,7 +102,7 @@ def get_location_1():
         else:
             if within_bound_no_toronto and within_bound_toronto:
                 print("\nWe have gotten two different locations based on your inputs, "
-                          "\nplease select the one you are at: \n")
+                        "\nplease select the one you are at: \n")
 
                 print("(1) " + getLoc_no_toronto.address)
                 print("(2) " + getLoc_toronto.address)
@@ -100,38 +119,21 @@ def get_location_1():
                         print("(2) " + getLoc_toronto.address)
 
                 if int(correct_location) == 1:
-                    print("\nOk, you will be leaving from: " + getLoc_no_toronto.address)
-
-                    # printing latitude and longitude
-                    print("\nLatitude: ", getLoc_no_toronto.latitude)
-                    print("Longitude: ", getLoc_no_toronto.longitude)
-
+                    print(getLoc_no_toronto)
                     origin_coords = (getLoc_no_toronto.latitude, getLoc_no_toronto.longitude)
-                else:
-                    print("\nOk, you will be leaving from: " + getLoc_toronto.address)
-
-                    # printing latitude and longitude
-                    print("\nLatitude: ", getLoc_toronto.latitude)
-                    print("Longitude: ", getLoc_toronto.longitude)
-
+                elif int(correct_location) == 2:
+                    print_address(getLoc_toronto)
                     origin_coords = (getLoc_toronto.latitude, getLoc_toronto.longitude)
-            elif within_bound_toronto:
-                print("\nOk, you will be leaving from: " + getLoc_toronto.address)
-
-                # printing latitude and longitude
-                print("\nLatitude: ", getLoc_toronto.latitude)
-                print("Longitude: ", getLoc_toronto.longitude)
-
+            elif within_bound_toronto and within_bound_no_toronto==False:
+                print_address(getLoc_toronto)
                 origin_coords = (getLoc_toronto.latitude, getLoc_toronto.longitude)
-            else:
-                print("\nOk, you will be leaving from: " + getLoc_no_toronto.address)
-
-                # printing latitude and longitude
-                print("\nLatitude: ", getLoc_no_toronto.latitude)
-                print("Longitude: ", getLoc_no_toronto.longitude)
-
+            elif within_bound_toronto==False and within_bound_no_toronto:
+                print(getLoc_no_toronto)
                 origin_coords = (getLoc_no_toronto.latitude, getLoc_no_toronto.longitude)
-        return origin_coords
+            elif within_bound_toronto==False and within_bound_no_toronto==False:
+                print("\nLocation is not in Toronto!\n")
+                return False
+    return origin_coords
     
 def get_location_2():
     specific_stop = input("Enter the specific stop name (ones found in the TTC website): ")
@@ -142,6 +144,8 @@ def get_location_2():
     if len(stop)!=0: 
         return (stop[0][2], stop[0][3])
     else:
+        # Clear terminal
+        os.system('cls')
         print("\nStop does not exist in database\n") 
         return False
 
@@ -151,12 +155,22 @@ def get_location_3():
     max_lon = -79.123111
     min_lat = 43.591811
     min_lon = -79.649908
-    coords = input("Enter coordinate values in this format --- lat,lon: ").replace(" ","")
-    if min_lat <= float(coords.split(',')[0]) <= max_lat and min_lon <= float(coords.split(',')[0]) <= max_lon:
-        return tuple(map(float, coords.split(', ')))
-    else:
-        print("\nCoordiantes are not in Toronto\n")
-        return False
+    valid_input = False
+    while valid_input==False:
+        coords = input("Enter coordinate values in this format --- lat, lon: ").replace(" ","")
+        x,y = coords.split(',')[0], coords.split(',')[1]
+        if x.isnumeric() and y.isnumeric():
+            if min_lat <= float(x) <= max_lat and min_lon <= float(y) <= max_lon:
+                return tuple(map(float, coords.split(', ')))
+            else:
+                # Clear terminal
+                os.system('cls')
+                print("\nCoordiantes are not in Toronto\n")
+                return False
+        else:
+            # Clear terminal
+            os.system('cls')
+            print("Please enter numeric values\n")
     
 def get_location(str):
     input_valid = False
