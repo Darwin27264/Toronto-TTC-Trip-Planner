@@ -480,7 +480,7 @@ def get_input():
         ":" + str(starting_time[1]) + " ------> " + str(ending_stop_name[1])+ " " + str(ending_time[0]) + 
         ":" + str(ending_time[1]))
 
-    return (start,starting_time) , (destination, ending_time), int(age), hasPresto, budget, additional_stops_list
+    return (start,(starting_time,starting_time)) , (destination, (ending_time,ending_time)), int(age), hasPresto, budget, additional_stops_list
 
 
 # Clear terminal
