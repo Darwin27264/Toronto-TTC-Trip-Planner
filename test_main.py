@@ -167,6 +167,21 @@ def get_location_2():
         return False
 
 
+def is_number(string):
+    """
+    Is numeric alternative for float numbers
+
+    :param string:
+    :return: True or False
+    """
+
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+
 def get_location_3():
     # Max and min coordinates defining Toronto Boundaries
     max_lat = 43.909707
@@ -174,26 +189,33 @@ def get_location_3():
     min_lat = 43.591811
     min_lon = -79.649908
     valid_input = False
-    while valid_input == False:
+
+    while not valid_input:
         coords = input("Enter coordinate values in this format --- lat, lon: ").replace(" ", "")
-        x, y = coords.split(',')[0], coords.split(',')[1]
-        if x.isnumeric() and y.isnumeric():
-            if min_lat <= float(x) <= max_lat and min_lon <= float(y) <= max_lon:
-                return tuple(map(float, coords.split(', ')))
+
+        if "," in coords:
+
+            x, y = coords.split(',')[0], coords.split(',')[1]
+
+            if is_number(x) and is_number(y):
+                if min_lat <= float(x) <= max_lat and min_lon <= float(y) <= max_lon:
+                    return tuple(float(i) for i in coords.split(','))
+                else:
+                    # Clear terminal
+                    os.system('cls')
+                    print("\nCoordinates are not in Toronto\n")
+                    return False
             else:
                 # Clear terminal
                 os.system('cls')
-                print("\nCoordiantes are not in Toronto\n")
-                return False
+                print("Please enter numeric values\n")
         else:
-            # Clear terminal
-            os.system('cls')
-            print("Please enter numeric values\n")
+            print("Please enter the coordinates in the correct format\n")
 
 
 def get_location(str):
     input_valid = False
-    while input_valid == False:
+    while not input_valid:
         print(str)
         input_method = input("Your input methods are: \n"
                              "(1) Address/General Location (Example: Yonge St, Zoo, 382 Yonge St, etc...)\n"
