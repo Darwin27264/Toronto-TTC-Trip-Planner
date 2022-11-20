@@ -35,6 +35,19 @@ def distance_finder(location, ttc_stops):
     return distance.distance(location, ttc_stops).km
 
 
+def get_stop_id_coord(stop_id):
+    """
+    Gets the coordinates of a stop_id
+
+    :param stop_id:
+    :return:
+    """
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop_id})
+    the_stop = s.fetchall()[0]
+
+    return (the_stop[2], the_stop[3])
+
+
 def find_closest_stop(location):
     """
     Finds the stop_id that's the closest to the location given
@@ -400,6 +413,15 @@ def get_budget():
 
 
 def get_additional_stops(start_time, end_time):
+    """
+    Records any extra stops the user wishes to take between
+    origin and destination
+
+    :param start_time:
+    :param end_time:
+    :return: additional_stops
+    """
+
     additional_stops = []
     start_time_var = start_time
     valid_Ans = False
@@ -458,6 +480,30 @@ def get_additional_stops(start_time, end_time):
     elif more_stops.upper() == "N":
         return additional_stops
     return additional_stops
+
+
+def nearby_stops(closest_stop):
+    """
+    Finds all the alternative nearby stops within the 200m range
+    to the closest stop found
+
+    :param closest_stop:
+    :return: all_nearby_stops
+    """
+    all_nearby_stops = []
+
+    s.execute("SELECT * FROM stops")
+    all_stops = s.fetchall()
+
+    closest_coord = get_stop_id_coord(closest_stop)
+
+    for every_stop in all_stops:
+        dis_between_stops = distance_finder(closest_coord, (every_stop[2], every_stop[3]))
+
+        if dis_between_stops <= 0.200:
+            all_nearby_stops.append(every_stop[0])
+
+    return all_nearby_stops
 
 
 def get_input():
@@ -534,7 +580,9 @@ def get_input():
 
 # Clear terminal
 os.system('cls')
-test_array = get_input()
+#test_array = get_input()
+
+print(nearby_stops(467))
 # print(test_array[0])
 # print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
 # starting_stop = find_closest_stop(test_array[0])
