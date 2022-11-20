@@ -314,8 +314,6 @@ def call_get_location(msg1, msg2, msg3):
                 else:
                     return near_stops[int(near_input)-1]
                         
-                    
-
 
 def validate_time(msg):
     validTime = False
@@ -475,8 +473,8 @@ def get_additional_stops(start_time, end_time):
             while no_overflow == False:
                 no_exceed_time = False
                 while no_exceed_time == False:
-                    staytime = validate_time("\nHow long do you want to stay at this stop?\
-                                                (HH:MM)(Example: 2 hours and 30 minutes --> (02:30)): ")
+                    staytime = validate_time("\nHow long do you want to stay at this stop?"
+                                                    "(HH:MM)(Example: 2 hours and 30 minutes --> (02:30)): ")
                     if check_time_before(staytime, end_time):
                         no_exceed_time = True
                     else:
@@ -564,17 +562,13 @@ def get_input():
     start_message2 = "Is this the stop you are currently at? (Y/N): "
     start_message3 = "\nAre any of these the stop you are currently at?\n"
     start = call_get_location(start_message1, start_message2, start_message3)
-    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
-    starting_stop_name = s.fetchone()
 
     os.system('cls')
     # Gets the stop id of the destination the user want to go to
     end_message1 = "Now let's find your destination stop \n"
     end_message2 = "Is this the stop want to go to? (Y/N): "
-    end_message3 = "\nAre of these the stop you want to go to?\n"
+    end_message3 = "\nAre any of these the stop you want to go to?\n"
     destination = call_get_location(end_message1, end_message2, end_message3)
-    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': destination})
-    ending_stop_name = s.fetchone()
 
     # Getting current time
     os.system('cls')
@@ -602,10 +596,6 @@ def get_input():
     os.system('cls')
     additional_stops_list = get_additional_stops(starting_time, ending_time)
 
-    print("\n" + str(starting_stop_name[1]) + " " + str(starting_time[0]) +
-          ":" + str(starting_time[1]) + " ------> " + str(ending_stop_name[1]) + " " + str(ending_time[0]) +
-          ":" + str(ending_time[1]))
-
     return (start, (starting_time, starting_time)), (destination, (ending_time, ending_time)), int(
         age), hasPresto, budget, additional_stops_list
 
@@ -613,7 +603,21 @@ def get_input():
 # Clear terminal
 os.system('cls')
 test_array = get_input()
-print(test_array)
+os.system('cls')
+s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': test_array[0][0]})
+starting_point = s.fetchone()
+print("Starting Point: " + str(starting_point[1]) + " --- StopID: " + str(starting_point[0]) + " --- Time(Hours,Minutes): " + str(test_array[0][1]))
+s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': test_array[1][0]})
+ending_point = s.fetchone()
+print("Ending Point: " + str(ending_point[1]) + " --- StopID: " + str(ending_point[0]) + " --- Time(Hours,Minutes): " + str(test_array[1][1]))
+print("Age: " + str(test_array[2]))
+print("Has Presto: " + str(test_array[3]))
+print("Budget: " + str(test_array[4]))
+for i in test_array[5]:
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': i[0]})
+    stop = s.fetchone()
+    print("Additional Stop: " + str(stop[1]) + " --- StopID: " + str(stop[0]) + " --- Time(Hours,Minutes): " + str(i[1]))
+
 #print(nearby_stops(467))
 # print(test_array[0])
 # print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
