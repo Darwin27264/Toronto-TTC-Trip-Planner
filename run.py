@@ -29,69 +29,48 @@ s = data_stop.cursor()
 config.sat_backend = "kissat"
 
 # Encoding that will store all of your constraints
-E = Encoding()
+global E
 
-
-# To create propositions, create classes for them first, annotated with "@proposition" and the Encoding
+# Class for Budget propositions
 @proposition(E)
-class BasicPropositions:
-
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return f"A.{self.data}"
+class budget_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, name):
+        self = name
 
 
-# Different classes for propositions are useful because this allows for more dynamic constraint creation
-# for propositions within that class. For example, you can enforce that "at least one" of the propositions
-# that are instances of this class must be true by using a @constraint decorator.
-# other options include: at most one, exactly one, at most k, and implies all.
-# For a complete module reference, see https://bauhaus.readthedocs.io/en/latest/bauhaus.html
-@constraint.at_least_one(E)
+# class for Time propositions
 @proposition(E)
-class FancyPropositions:
-
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return f"A.{self.data}"
+class time_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, name):
+        self = name
 
 
-# # Budget/Price
-# kid = Var('kids/children')
-# adult = Var('adult')
-# youth = Var('youth')
-# senior = Var('senior')
-# presto = Var('presto user')
-# presto_adult = Var('presto user (adult)')
-# presto_youth = Var('presto user (youth)')
-# presto_senior = Var('presto user (senior)')
-# presto_day_pass = Var('buy presto day pass')
-# surpass_day_pass = Var('cheaper to go with day pass')
-# # Time
-# within_time_constraint = Var('within time constraint')
-# rush_hour = Var('rush hour')
-# # Additional Stops Requested
-# additional_stops = Var('additional stops')
+# class for Additional Stops propositions
+@proposition(E)
+class add_stops_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, name):
+        self = name
 
-kid = BasicPropositions('kids/children')
-adult = BasicPropositions('adult')
-youth = BasicPropositions('youth')
-senior = BasicPropositions('senior')
-presto = BasicPropositions('presto user')
-presto_adult = BasicPropositions('presto user (adult)')
-presto_youth = BasicPropositions('presto user (youth)')
-presto_senior = BasicPropositions('presto user (senior)')
-presto_day_pass = BasicPropositions('buy presto day pass')
-surpass_day_pass = BasicPropositions('cheaper to go with day pass')
 
+# Declaring Propositions
+kid = budget_prop('kids/children')
+adult = budget_prop('adult')
+youth = budget_prop('youth')
+senior = budget_prop('senior')
+presto = budget_prop('presto user')
+presto_adult = budget_prop('presto user (adult)')
+presto_youth = budget_prop('presto user (youth)')
+presto_senior = budget_prop('presto user (senior)')
+presto_day_pass = budget_prop('buy presto day pass')
+surpass_day_pass = budget_prop('cheaper to go with day pass')
 # Time
-within_time_constraint = BasicPropositions('within time constraint')
-rush_hour = BasicPropositions('rush hour')
+within_time_constraint = time_prop('within time constraint')
+rush_hour = time_prop('rush hour')
 # Additional Stops Requested
-additional_stops = BasicPropositions('additional stops')
+additional_stops = add_stops_prop('additional stops')
 
 
 # Build an example full theory for your setting and return it.
@@ -100,10 +79,18 @@ additional_stops = BasicPropositions('additional stops')
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
 def example_theory():
+    E = Encoding()
     # User must be fall into one of the age groups
     E.add_constraint(adult | youth | senior | kid)
+    # The user may only fall into one age group at a time
+    E.add_constraint(~adult | (~youth & ~senior & ~kid))
+    E.add_constraint(~youth | (~adult & ~senior & ~kid))
+    E.add_constraint(~senior | (~youth & ~adult & ~kid))
+    E.add_constraint(~kid | (~youth & ~senior & ~adult))
 
-    # # Add custom constraints by creating formulas with the variables you created.
+    # 
+
+    # Add custom constraints by creating formulas with the variables you created.
     # E.add_constraint((a | b) & ~x)
     # # Implication
     # E.add_constraint(y >> z)
