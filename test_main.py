@@ -497,6 +497,7 @@ def get_additional_stops(start_time, end_time):
             additional_stops.append((stop_id, (time, leave_time)))
             valid_another = False
             while valid_another == False:
+                os.system(clearTermial)
                 another = input("\nWould you like to add another stop? (Y/N): ")
                 if another.upper() == "Y" or another.upper() == "N":
                     valid_another = True
