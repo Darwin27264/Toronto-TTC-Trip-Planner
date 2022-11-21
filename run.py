@@ -31,6 +31,7 @@ config.sat_backend = "kissat"
 # Encoding that will store all of your constraints
 global E
 
+
 # Class for Budget propositions
 @proposition(E)
 class budget_prop:
@@ -56,6 +57,8 @@ class add_stops_prop:
 
 
 # Declaring Propositions
+
+# Budget
 kid = budget_prop('kids/children')
 adult = budget_prop('adult')
 youth = budget_prop('youth')
@@ -66,6 +69,7 @@ presto_youth = budget_prop('presto user (youth)')
 presto_senior = budget_prop('presto user (senior)')
 presto_day_pass = budget_prop('buy presto day pass')
 surpass_day_pass = budget_prop('cheaper to go with day pass')
+within_budget = budget_prop('trip plan is within budget')
 # Time
 within_time_constraint = time_prop('within time constraint')
 rush_hour = time_prop('rush hour')
@@ -80,15 +84,27 @@ additional_stops = add_stops_prop('additional stops')
 #  what the expectations are.
 def example_theory():
     E = Encoding()
+
+    # Reference Code found here:
+    # https://github.com/beckydvn/modelling-project-remaster/blob/main/modelling-project-original-and-remaster/modelling-project-1-REMASTER-2.0/run.py
+
     # User must be fall into one of the age groups
     E.add_constraint(adult | youth | senior | kid)
     # The user may only fall into one age group at a time
-    E.add_constraint(~adult | (~youth & ~senior & ~kid))
-    E.add_constraint(~youth | (~adult & ~senior & ~kid))
-    E.add_constraint(~senior | (~youth & ~adult & ~kid))
-    E.add_constraint(~kid | (~youth & ~senior & ~adult))
+    constraint.add_exactly_one(E, adult, youth, senior, kid)
 
-    # 
+    # If the user is not a Presto holder
+    if not presto_holder:
+        E.add_constraint(~presto)
+    else:
+        E.add_constraint(~presto_senior | (~presto & ~senior))
+
+    # this needs more work
+    if not trip_withing_rush_hour:
+        E.add_constraint(~rush_hour)
+
+    E.add_constraint(additional_stops & (within_time_constraint | within_budget))
+
 
     # Add custom constraints by creating formulas with the variables you created.
     # E.add_constraint((a | b) & ~x)
