@@ -378,7 +378,7 @@ def get_end_time(starting_time, msg, msg1):
     valid_Time = False
     while valid_Time == False:
         ending_time = validate_time(msg1)
-        if check_time_after(starting_time, ending_time):
+        if check_time(starting_time, ending_time):
             valid_Time = True
         else:
             os.system(clearTermial)
@@ -386,16 +386,7 @@ def get_end_time(starting_time, msg, msg1):
     return ending_time
 
 
-def check_time_before(starting, ending):
-    if starting[0] < ending[0]:
-        return False
-    if starting[0] == ending[1]:
-        if starting[1] <= ending[1]:
-            return False
-    return True
-
-
-def check_time_after(starting, ending):
+def check_time(starting, ending):
     if starting[0] > ending[0]:
         return False
     if starting[0] == ending[1]:
@@ -478,32 +469,32 @@ def get_additional_stops(start_time, end_time):
             stop_message2 = "Is this the stop want to go to? (Y/N): "
             stop_message3 = "\nAre any of these the stop you are looking for?\n"
             stop_id = call_get_location(stop_message1, stop_message2, stop_message3)
-            string = "Enter the time you wish to arrive at your stop (HH:MM): "
-            time = get_end_time(start_time_var, "Stop time must be after the previous stop time\n", string)
             no_overflow = False
             while no_overflow == False:
                 no_exceed_time = False
                 while no_exceed_time == False:
+                    string = "Enter the time you wish to arrive at your stop (HH:MM): "
+                    time = get_end_time(start_time_var, "Stop time must be after the previous stop time\n", string)
                     staytime = validate_time("\nHow long do you want to stay at this stop?"
                                                     "(HH:MM)(Example: 2 hours and 30 minutes --> (02:30)): ")
-                    if check_time_before(staytime, end_time):
+                    if check_time(time, end_time) == True:
                         no_exceed_time = True
                     else:
                         os.system(clearTermial)
                         print("Cannot visit stop after ending stop\n")
-                minutes = time[1] + staytime[1]
+                minutes = time[1] + staytime[1] + (staytime[0]*60)
                 hours = time[0] + (minutes // 60)
                 if hours >= 24:
                     os.system(clearTermial)
                     print("Cannot stay at stop until next day\n")
                 else:
                     leave_time = (hours, minutes % 60)
-                    if check_time_before(leave_time, end_time):
+                    if check_time(leave_time, end_time):
                         no_overflow = True
                     else:
                         os.system(clearTermial)
                         print("Cannot stay at stop until after ending stop time\n")
-            additional_stops.append(stop_id, (time, leave_time))
+            additional_stops.append((stop_id, (time, leave_time)))
             valid_another = False
             while valid_another == False:
                 another = input("\nWould you like to add another stop? (Y/N): ")
