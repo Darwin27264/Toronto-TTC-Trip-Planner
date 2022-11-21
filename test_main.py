@@ -537,9 +537,9 @@ def nearby_stops(closest_stop):
     return all_nearby_stops
 
 
-def trip_within_rh(start_time, end_time):
+def route_within_rh(start_time, end_time):
     """
-    Gets the start and ending time of the trip
+    Gets the start and ending time of a route
     and checks if the times falls within the predefined
     rush hour period...
 
@@ -548,7 +548,7 @@ def trip_within_rh(start_time, end_time):
 
     :param start_time:
     :param end_time:
-    :return: within_rh - Boolean - returns true if the stop time given
+    :return: within_rh - Boolean - returns true if the route time given
                                     falls within the rush hour periods
     """
 
