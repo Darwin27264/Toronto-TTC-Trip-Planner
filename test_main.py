@@ -548,7 +548,8 @@ def trip_within_rh(start_time, end_time):
 
     :param start_time:
     :param end_time:
-    :return:
+    :return: within_rh - Boolean - returns true if the stop time given
+                                    falls within the rush hour periods
     """
 
     within_rh = False
