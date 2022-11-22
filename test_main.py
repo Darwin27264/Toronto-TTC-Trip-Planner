@@ -476,7 +476,7 @@ def get_additional_stops(start_time, end_time):
             while no_overflow == False:
                 no_exceed_time = False
                 while no_exceed_time == False:
-                    string = "Enter the time you wish to arrive at your stop (HH:MM): "
+                    string = "\nEnter the time you wish to arrive at your stop (HH:MM): "
                     time = get_end_time(start_time_var, "Stop time must be after the previous stop time\n", string)
                     staytime = validate_time("\nHow long do you want to stay at this stop?"
                                              "(HH:MM)(Example: 2 hours and 30 minutes --> (02:30)): ")
