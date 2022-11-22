@@ -13,6 +13,9 @@ import platform
 from geopy.geocoders import Nominatim
 from geopy import distance
 
+# importing output objects
+from input import Input
+
 # Importing database
 data = sqlite3.connect('routes.db')
 d = data.cursor()
@@ -625,35 +628,40 @@ def get_input():
     os.system(clearTermial)
     additional_stops_list = get_additional_stops(starting_time, ending_time)
 
-    return (start, (starting_time, starting_time)), (destination, (ending_time, ending_time)), int(
-        age), hasPresto, budget, additional_stops_list
+    user_input = Input((start, (starting_time, starting_time)), (destination, (ending_time, ending_time)), int(
+        age), hasPresto, budget, additional_stops_list)
+    return user_input
 
 
 # Clear terminal
 os.system(clearTermial)
-test_array = get_input()
+input = get_input()
 os.system(clearTermial)
-s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': test_array[0][0]})
+print("Starting stop_id: " + str(input.starting_stop.stop_id))
+s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': input.starting_stop.stop_id})
 starting_point = s.fetchone()
-print("Starting Point: " + str(starting_point[1]) + " --- StopID: " + str(
-    starting_point[0]) + " --- Time(Hours,Minutes): " + str(test_array[0][1]))
-s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': test_array[1][0]})
+print("Starting name: " + starting_point[1])
+print("Starting arrive time: "+str(input.starting_stop.arrive_time))
+print("Starting leave time: "+str(input.starting_stop.leave_time))
+print("\n")
+print("Ending stop_id: " + str(input.ending_stop.stop_id))
+s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': input.ending_stop.stop_id})
 ending_point = s.fetchone()
-print("Ending Point: " + str(ending_point[1]) + " --- StopID: " + str(
-    ending_point[0]) + " --- Time(Hours,Minutes): " + str(test_array[1][1]))
-print("Age: " + str(test_array[2]))
-print("Has Presto: " + str(test_array[3]))
-print("Budget: " + str(test_array[4]))
-for i in test_array[5]:
-    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': i[0]})
-    stop = s.fetchone()
-    print(
-        "Additional Stop: " + str(stop[1]) + " --- StopID: " + str(stop[0]) + " --- Time(Hours,Minutes): " + str(i[1]))
-
-# print(nearby_stops(467))
-# print(test_array[0])
-# print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
-# starting_stop = find_closest_stop(test_array[0])
-# s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': starting_stop})
-# starting_stop_name = s.fetchall()
-# print(str(starting_stop_name[0][0])+ " " + str(starting_stop_name[0][1]) + " " + str(starting_stop_name[0][2]) + "," +str(starting_stop_name[0][3]))
+print("Ending name: " + ending_point[1])
+print("Ending arrive time: " + str(input.ending_stop.arrive_time))
+print("Ending leave time: " + str(input.ending_stop.leave_time))
+print("\n")
+print("Age: " + str(input.age))
+print("\n")
+print("Has Presto: " + str(input.hasPresto))
+print("\n")
+print("Budget: " + str(input.budget))
+print("\n")
+for i in input.additional_stops_list:
+    print("Additional stop stop_id: " + str(i.stop_id))
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': i.stop_id})
+    point = s.fetchone()
+    print("Additional stop name: " + point[1])
+    print("Additional stop arrive time: " + str(i.arrive_time))
+    print("Additional stop leave time: " + str(i.leave_time))
+    print("\n")
