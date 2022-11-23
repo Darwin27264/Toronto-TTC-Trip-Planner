@@ -153,7 +153,7 @@ def find_direct_route(start,end):
 
 os.system(clearTermial)
 #info = get_input()
-info = Input((14235, (12, 0)), (3169, (20, 0)), 19, True, 20,[])
+info = Input((14235, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 print_info(info)
 print(find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
 print(find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
