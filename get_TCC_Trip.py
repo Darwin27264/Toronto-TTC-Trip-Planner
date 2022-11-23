@@ -49,7 +49,8 @@ def start_to_close(start, end):
     Returns:
         if a route is found under the conditions above, then
         the function will return a tuple of the starting stop,
-        new ending stop, and then the string "start_to_close"
+        new ending stop, and then the string "start_to_close",
+        and the route name
     """
     near_end_stops = nearby_stops(end)
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
@@ -66,7 +67,7 @@ def start_to_close(start, end):
             for k in list_close:
                 if stop_distance(start,k) < closest:
                     closest = k
-            return (start,closest,"start_to_close")
+            return (start,closest,"start_to_close",route[1])
         else: return False
 
 def close_to_end(start, end):
@@ -82,7 +83,7 @@ def close_to_end(start, end):
     Returns:
         if a route is found under the conditions above, then
         the function will return a tuple of the new starting stop,
-        ending stop, and the string "close_to_end"
+        ending stop, the string "close_to_end", and the route name
     """
     near_start_stops = nearby_stops(start)
     list_close = []
@@ -99,7 +100,7 @@ def close_to_end(start, end):
         for k in list_close:
                 if stop_distance(start,k) < closest:
                     closest = k
-        return (closest,end,"close_to_end")
+        return (closest,end,"close_to_end",route[1])
     else: return False
 
 
@@ -118,8 +119,8 @@ def find_close_direct_route(start, end):
     Returns:
         if a route is found under any of those conditions, then
         the function will return a tuple of the starting stop,
-        ending stop, and then information about which stop has
-        changed.
+        ending stop,then information about which stop has
+        changed, and then the route name
     """
     route = start_to_close(start, end)
     if route != False: return route
@@ -139,15 +140,15 @@ def find_direct_route(start,end):
 
     Returns:
         if a direct route is found then return a tuple
-        of the starting stop, ending stop, and the string
-        'direct'
+        of the starting stop, ending stop, the string
+        'direct', and the route name
     """
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
     starting_point = s.fetchone()
     for i in binary_to_dict(starting_point[4]):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
         route = r.fetchone()
-        if str(end) in binary_to_dict(route[4]): return (start,end,'direct')
+        if str(end) in binary_to_dict(route[4]): return (start,end,'direct',route[1])
     return False
 
 
