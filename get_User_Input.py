@@ -1,11 +1,6 @@
-# from bauhaus import Encoding, proposition, constraint
-# from bauhaus.utils import count_solutions, likelihood
-
 # Some custom imports including time, SQLite
 from datetime import datetime
 import sqlite3
-import json
-import geocoder
 import os
 import platform
 
@@ -17,12 +12,6 @@ from geopy import distance
 from input import Input
 
 # Importing database
-data = sqlite3.connect('routes.db')
-d = data.cursor()
-
-data_trip = sqlite3.connect('trips.db')
-t = data_trip.cursor()
-
 data_stop = sqlite3.connect('stops.db')
 s = data_stop.cursor()
 
