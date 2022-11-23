@@ -47,7 +47,7 @@ def start_to_close(start, end):
         end: ending stop_id
 
     Returns:
-        if a route is found under any of those conditions, then
+        if a route is found under the conditions above, then
         the function will return a tuple of the starting stop,
         new ending stop, and then the string "start_to_close"
     """
@@ -80,7 +80,7 @@ def close_to_end(start, end):
         end: ending stop_id
 
     Returns:
-        if a route is found under any of those conditions, then
+        if a route is found under the conditions above, then
         the function will return a tuple of the new starting stop,
         ending stop, and the string "close_to_end"
     """
@@ -138,22 +138,25 @@ def find_direct_route(start,end):
         end: ending stop_id
 
     Returns:
-        returns true or false depending on if a direct route
-        is found
+        if a direct route is found then return a tuple
+        of the starting stop, ending stop, and the string
+        'direct'
     """
-    return_value = False
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
     starting_point = s.fetchone()
     for i in binary_to_dict(starting_point[4]):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
         route = r.fetchone()
-        if str(end) in binary_to_dict(route[4]): return_value = True
-    return return_value
+        if str(end) in binary_to_dict(route[4]): return (start,end,'direct')
+    return False
 
 
 os.system(clearTermial)
-#info = get_input()
-info = Input((14235, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
+info = get_input()
+# info = Input((14235, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 print_info(info)
-print(find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
-print(find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
+direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
+if direct!=False:
+    print(direct)
+else:
+    print(find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
