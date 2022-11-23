@@ -16,6 +16,8 @@ from geopy import distance
 from nnf import config
 from nnf import Var
 
+from get_User_Input import get_input, route_within_rh
+
 # Importing database
 data = sqlite3.connect('routes.db')
 d = data.cursor()
@@ -31,6 +33,7 @@ config.sat_backend = "kissat"
 # Encoding that will store all of your constraints
 global E
 
+global user_input
 
 # Class for Budget propositions
 @proposition(E)
@@ -67,8 +70,9 @@ presto = budget_prop('presto user')
 presto_adult = budget_prop('presto user (adult)')
 presto_youth = budget_prop('presto user (youth)')
 presto_senior = budget_prop('presto user (senior)')
+presto_other=  budget_prop('presto users (not adults)')
 presto_day_pass = budget_prop('buy presto day pass')
-surpass_day_pass = budget_prop('cheaper to go with day pass')
+surpass_normal_price = budget_prop('cheaper to go with day pass')
 within_budget = budget_prop('trip plan is within budget')
 # Time
 within_time_constraint = time_prop('within time constraint')
@@ -94,15 +98,38 @@ def example_theory():
     constraint.add_exactly_one(E, adult, youth, senior, kid)
 
     # If the user is not a Presto holder
-    if not presto_holder:
+    if not user_input.hasPresto:
         E.add_constraint(~presto)
-    else:
-        E.add_constraint(~presto_senior | (~presto & ~senior))
 
+    # Determining and adding the user to an age group
+    if user_input.age <= 12:
+        E.add_constraint(~(~kid))
+        E.add_constraint(~(~within_budget))
+    elif 13 <= user_input.age <= 19:
+        E.add_constraint(~(~youth))
+    elif 20 <= user_input.age < 65:
+        E.add_constraint(~(~adult))
+    else:
+        E.add_constraint(~(~senior))
+
+    E.add_constraint(~(presto & youth) | presto_youth)
+    E.add_constraint(~(presto & adult) | presto_adult)
+    E.add_constraint(~(presto & senior) | presto_senior)
+
+    constraint.add_exactly_one(E, presto_youth, presto_adult, presto_senior)
+
+    # Rush Hour constraints
     # this needs more work
-    if not trip_withing_rush_hour:
+    if not route_within_rh:
         E.add_constraint(~rush_hour)
 
+    # Additional stops constraints
+    if not additional_stops_budget_surpass:
+        E.add_constraint(~(~surpass_normal_price))
+
+        E.add_constraint(~surpass_normal_price | presto_day_pass)
+
+    # Main/final constraint, all must satisfy route to be valid
     E.add_constraint(additional_stops & (within_time_constraint | within_budget))
 
     # Add custom constraints by creating formulas with the variables you created.
@@ -119,10 +146,7 @@ def example_theory():
 
 
 def main():
-    test_array = get_input()
-    print(test_array[0])
-    # print(distance_finder((43.6950093, -79.3959279), (43.909707, -79.123111)))
-    print(find_closest_stop(test_array[0]))
+    user_input = get_input()
 
 
 main()
