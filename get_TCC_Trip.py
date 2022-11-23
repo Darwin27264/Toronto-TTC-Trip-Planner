@@ -129,6 +129,18 @@ def find_close_direct_route(info):
 
 
 def find_direct_route(info):
+    """
+    Summary:
+        check if there is a direct route from the starting
+        stop to the ending stop
+
+    Args:
+        info: input information from user
+
+    Returns:
+        returns true or false depending on if a direct route
+        is found
+    """
     return_value = False
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
     starting_point = s.fetchone()
