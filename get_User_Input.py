@@ -621,14 +621,15 @@ def get_input():
         age), hasPresto, budget, additional_stops_list)
     return user_input
 
+
 def print_info(info):
     os.system(clearTermial)
     print("Starting stop_id: " + str(info.starting_stop.stop_id))
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
     starting_point = s.fetchone()
     print("Starting name: " + starting_point[1])
-    print("Starting arrive time: "+str(info.starting_stop.arrive_time))
-    print("Starting leave time: "+str(info.starting_stop.leave_time))
+    print("Starting arrive time: " + str(info.starting_stop.arrive_time))
+    print("Starting leave time: " + str(info.starting_stop.leave_time))
     print("\n")
     print("Ending stop_id: " + str(info.ending_stop.stop_id))
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.ending_stop.stop_id})
