@@ -28,15 +28,19 @@ def binary_to_dict(the_binary):
     return d
 
 
+def starting_route_stops(info):
+    return_value = False
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
+    starting_point = s.fetchone()
+    for i in binary_to_dict(starting_point[4]):
+        r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
+        route = r.fetchone()
+        if str(info.ending_stop.stop_id) in binary_to_dict(route[4]): return_value = True
+    return return_value
+
 
 os.system(clearTermial)
 print("test")
 info = get_input()
 print_info(info)
-s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
-starting_point = s.fetchone()
-print(binary_to_dict(starting_point[4]))
-for i in binary_to_dict(starting_point[4]):
-    r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
-    route = r.fetchone()
-    print(route[1])
+print(starting_route_stops(info))
