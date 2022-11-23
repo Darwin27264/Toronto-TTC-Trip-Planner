@@ -36,24 +36,23 @@ def stop_distance(stop1,stop2):
     return math.sqrt(pow(stop1[2]-stop2[2],2)+pow(stop1[3]-stop2[3],2))
 
 
-def start_to_close(info):
+def start_to_close(start, end):
     """
     Summary:
         check if a stop within 200 meters of the ending stop 
         has a direct route from the starting stop
 
     Args:
-        info: input information from user
+        start: starting stop_id
+        end: ending stop_id
 
     Returns:
         if a route is found under any of those conditions, then
         the function will return a tuple of the starting stop,
         new ending stop, and then the string "start_to_close"
     """
-    start = info.starting_stop.stop_id
-    end = info.ending_stop.stop_id
     near_end_stops = nearby_stops(end)
-    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
     starting_point = s.fetchone()
     for i in binary_to_dict(starting_point[4]):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
@@ -70,22 +69,21 @@ def start_to_close(info):
             return (start,closest,"start_to_close")
         else: return False
 
-def close_to_end(info):
+def close_to_end(start, end):
     """
     Summary:
         check if a stop within 200 meters of the starting stop
         goes to the ending stop
 
     Args:
-        info: input information from user
+        start: starting stop_id
+        end: ending stop_id
 
     Returns:
         if a route is found under any of those conditions, then
         the function will return a tuple of the new starting stop,
         ending stop, and the string "close_to_end"
     """
-    start = info.starting_stop.stop_id
-    end = info.ending_stop.stop_id
     near_start_stops = nearby_stops(start)
     list_close = []
     for i in near_start_stops:
@@ -105,7 +103,7 @@ def close_to_end(info):
     else: return False
 
 
-def find_close_direct_route(info):
+def find_close_direct_route(start, end):
     """
     Summary:
         check if a stop within 200 meters of the starting stop
@@ -114,7 +112,8 @@ def find_close_direct_route(info):
         stop
 
     Args:
-        info: input information from user
+        start: starting stop_id
+        end: ending stop_id
 
     Returns:
         if a route is found under any of those conditions, then
@@ -122,38 +121,39 @@ def find_close_direct_route(info):
         ending stop, and then information about which stop has
         changed.
     """
-    route = start_to_close(info)
+    route = start_to_close(start, end)
     if route != False: return route
-    else: return close_to_end(info)
+    else: return close_to_end(start, end)
         
 
 
-def find_direct_route(info):
+def find_direct_route(start,end):
     """
     Summary:
         check if there is a direct route from the starting
         stop to the ending stop
 
     Args:
-        info: input information from user
+        start: starting stop_id
+        end: ending stop_id
 
     Returns:
         returns true or false depending on if a direct route
         is found
     """
     return_value = False
-    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
     starting_point = s.fetchone()
     for i in binary_to_dict(starting_point[4]):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
         route = r.fetchone()
-        if str(info.ending_stop.stop_id) in binary_to_dict(route[4]): return_value = True
+        if str(end) in binary_to_dict(route[4]): return_value = True
     return return_value
 
 
 os.system(clearTermial)
 #info = get_input()
-info = Input((3169, (12, 0)), (14235, (20, 0)), 19, True, 20,[])
+info = Input((14235, (12, 0)), (3169, (20, 0)), 19, True, 20,[])
 print_info(info)
-print(find_direct_route(info))
-print(find_close_direct_route(info))
+print(find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
+print(find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id))
