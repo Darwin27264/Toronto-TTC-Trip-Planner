@@ -379,9 +379,11 @@ def get_end_time(starting_time, msg, msg1):
 
 
 def check_time(starting, ending):
+    print(starting)
+    print(ending)
     if starting[0] > ending[0]:
         return False
-    if starting[0] == ending[1]:
+    if starting[0] == ending[0]:
         if starting[1] >= ending[1]:
             return False
     return True

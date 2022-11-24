@@ -155,7 +155,7 @@ def find_close_direct_route(start, end):
         
 
 
-def find_direct_route(start,end):
+def find_direct_route(start,end,val):
     """
     Summary:
         check if there is a direct route from the starting
@@ -164,6 +164,7 @@ def find_direct_route(start,end):
     Args:
         start: starting stop_id
         end: ending stop_id
+        val: if true check the close stops as well
 
     Returns:
         if a direct route is found then return a list of tuples
@@ -178,46 +179,80 @@ def find_direct_route(start,end):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
         route = r.fetchone()
         if str(end) in binary_to_dict(route[4]): valid_routes.append((start,end,'direct',route[1],route[2]))
-    return valid_routes
+    if val:
+        close_routes = find_close_direct_route(start,end)
+        return valid_routes + close_routes
+    else: return valid_routes
 
+def make_stops_dict(stop):
+    s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop})
+    stop = s.fetchone()
+    all_stops = {}
+    for i in binary_to_dict(stop[4]):
+        r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
+        route = r.fetchone()
+        for j in binary_to_dict(route[4]):
+            all_stops[j] = 0
+    print(all_stops)
+    return all_stops
 
 os.system(clearTermial)
 # User input test
-# info = get_input()
-# print_info(info)
-# direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# close = find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# print(direct+close)
-# print("--------------------------------")
+info = get_input()
+print_info(info)
+direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id,True)
+if len(direct_routes)!=0:
+    print(direct_routes)
+else:
+    stops_dict = make_stops_dict(info.ending_stop.stop_id)
+    for i in stops_dict:
+        alt_route = find_direct_route(info.starting_stop.stop_id,int(i),False)
+        if len(alt_route)!=0:
+            print(alt_route)
+        else:
+            print(i)
+print("--------------------------------")
 
 # Direct Route Test
 # info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
 # print_info(info)
-# direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# close = find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# print(direct+close)
+# direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
+# print(direct_routes)
 # print("--------------------------------")
 
 # Start to Close Test
 # info = Input((3169, ((12, 0),(12, 0))), (14235, ((20, 0),(20, 0))), 19, True, 20,[])
 # print_info(info)
-# direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# close = find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# print(direct+close)
+# direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
+# print(direct_routes)
 # print("--------------------------------")
 
 # Close to End Test
 # info = Input((14235, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 # print_info(info)
-# direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# close = find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-# print(direct+close)
+# direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
+# print(direct_routes)
 # print("--------------------------------")
 
 # Close to Close Test
-info = Input((9227, ((12, 0),(12, 0))), (3390, ((20, 0),(20, 0))), 19, True, 20,[])
-print_info(info)
-direct = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-close = find_close_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
-print(direct+close)
-print("--------------------------------")
+# info = Input((9227, ((12, 0),(12, 0))), (3390, ((20, 0),(20, 0))), 19, True, 20,[])
+# print_info(info)
+# direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id)
+# print(direct_routes)
+# print("--------------------------------")
+
+# Alternative Route
+# info = Input((4308, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
+# print_info(info)
+# direct_routes = find_direct_route(info.starting_stop.stop_id,info.ending_stop.stop_id,True)
+# if len(direct_routes)!=0:
+#     print(direct_routes)
+# else:
+#     stops_dict = make_stops_dict(info.ending_stop.stop_id)
+#     for i in stops_dict:
+#         alt_route = find_direct_route(info.starting_stop.stop_id,int(i),False)
+#         if len(alt_route)!=0:
+#             print(alt_route)
+#         else:
+#             print(i)
+# print("--------------------------------")
