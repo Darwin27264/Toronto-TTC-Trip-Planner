@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import json
-import math 
+import math
 
 # Import User Input Function
 from get_User_Input import *
@@ -16,6 +16,7 @@ s = data_stop.cursor()
 data_subway = sqlite3.connect('subway.db')
 m = data_subway.cursor()
 
+
 def dict_to_binary(the_dict):
     str = json.dumps(the_dict)
     binary = ' '.join(format(ord(letter), 'b') for letter in str)
@@ -24,15 +25,16 @@ def dict_to_binary(the_dict):
 
 def binary_to_dict(the_binary):
     jsn = ''.join(chr(int(x, 2)) for x in the_binary.split())
-    d = json.loads(jsn)  
+    d = json.loads(jsn)
     return d
 
-def stop_distance(stop1,stop2):
+
+def stop_distance(stop1, stop2):
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop1})
     stop1 = s.fetchone()
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop2})
     stop2 = s.fetchone()
-    return math.sqrt(pow(stop1[2]-stop2[2],2)+pow(stop1[3]-stop2[3],2))
+    return math.sqrt(pow(stop1[2] - stop2[2], 2) + pow(stop1[3] - stop2[3], 2))
 
 
 def start_to_close(start, near_end_stops):
@@ -57,12 +59,13 @@ def start_to_close(start, near_end_stops):
     starting_point = s.fetchone()
     valid_routes = []
     for i in binary_to_dict(starting_point[4]):
-        r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
+        r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': i})
         route = r.fetchone()
         for j in near_end_stops:
-            if str(j) in binary_to_dict(route[4]): 
-                valid_routes.append((start,j,"start_to_close",route[1],route[2]))
+            if str(j) in binary_to_dict(route[4]):
+                valid_routes.append((start, j, "start_to_close", route[1], route[2]))
     return valid_routes
+
 
 def close_to_end(end, near_start_stops):
     """
@@ -86,13 +89,14 @@ def close_to_end(end, near_start_stops):
         s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': i})
         starting_point = s.fetchone()
         for j in binary_to_dict(starting_point[4]):
-            r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': j})
+            r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': j})
             route = r.fetchone()
             if str(end) in binary_to_dict(route[4]):
-                valid_routes.append((i,end,"close_to_end",route[1],route[2]))
+                valid_routes.append((i, end, "close_to_end", route[1], route[2]))
     return valid_routes
 
-def close_to_close(near_start_stops,near_end_stops):
+
+def close_to_close(near_start_stops, near_end_stops):
     """
     Summary:
         check if a stop within 200 meters of the starting stop
@@ -116,11 +120,11 @@ def close_to_close(near_start_stops,near_end_stops):
         s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': i})
         starting_point = s.fetchone()
         for j in binary_to_dict(starting_point[4]):
-            r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': j})
+            r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': j})
             route = r.fetchone()
             for k in near_end_stops:
                 if str(k) in binary_to_dict(route[4]):
-                    valid_routes.append((i,k,"close_to_close",route[1],route[2]))
+                    valid_routes.append((i, k, "close_to_close", route[1], route[2]))
     return valid_routes
 
 
@@ -147,14 +151,13 @@ def find_close_direct_route(start, end):
     near_end_stops = nearby_stops(end)
     route1 = start_to_close(start, near_end_stops)
     route2 = close_to_end(end, near_start_stops)
-    route3 = close_to_close(near_start_stops,near_end_stops)
+    route3 = close_to_close(near_start_stops, near_end_stops)
     all_routes = []
     all_routes = route1 + route2 + route3
     return all_routes
-        
 
 
-def find_direct_route(start,end,val):
+def find_direct_route(start, end, val):
     """
     Summary:
         check if there is a direct route from the starting
@@ -175,34 +178,38 @@ def find_direct_route(start,end,val):
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': start})
     starting_point = s.fetchone()
     for i in binary_to_dict(starting_point[4]):
-        r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
+        r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': i})
         route = r.fetchone()
-        if str(end) in binary_to_dict(route[4]): valid_routes.append((start,end,'direct',route[1],route[2]))
+        if str(end) in binary_to_dict(route[4]): valid_routes.append((start, end, 'direct', route[1], route[2]))
     if val:
-        close_routes = find_close_direct_route(start,end)
+        close_routes = find_close_direct_route(start, end)
         return valid_routes + close_routes
-    else: return valid_routes
+    else:
+        return valid_routes
+
 
 def make_stops_dict(stop):
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop})
     stop = s.fetchone()
     all_stops = {}
     for i in binary_to_dict(stop[4]):
-        r.execute("SELECT * FROM routes WHERE route_id=:route_id",{'route_id': i})
+        r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': i})
         route = r.fetchone()
         for j in binary_to_dict(route[4]):
             all_stops[j] = 0
     print(all_stops)
     return all_stops
 
-def navigate_subway(start,end):
-    m.execute("SELECT * FROM subways WHERE stop_id=:stop_id", {'stop_id':start})
+
+def navigate_subway(start, end):
+    m.execute("SELECT * FROM subways WHERE stop_id=:stop_id", {'stop_id': start})
     start_plat = m.fetchone()
-    m.execute("SELECT * FROM subways WHERE stop_name LIKE :stop_name",{'stop_name':(start_plat[1].split("-")[0]+"%")})
+    m.execute("SELECT * FROM subways WHERE stop_name LIKE :stop_name",
+              {'stop_name': (start_plat[1].split("-")[0] + "%")})
     all_start_platform = m.fetchall()
-    m.execute("SELECT * FROM subways WHERE stop_id=:stop_id", {'stop_id':end})
+    m.execute("SELECT * FROM subways WHERE stop_id=:stop_id", {'stop_id': end})
     end_plat = m.fetchone()
-    m.execute("SELECT * FROM subways WHERE stop_name LIKE :stop_name",{'stop_name':(end_plat[1].split("-")[0]+"%")})
+    m.execute("SELECT * FROM subways WHERE stop_name LIKE :stop_name", {'stop_name': (end_plat[1].split("-")[0] + "%")})
     all_end_platform = m.fetchall()
     all_routes = []
     for i in all_start_platform:
@@ -210,79 +217,80 @@ def navigate_subway(start,end):
             start_platform = i
             end_platform = j
             if start_platform[4] == end_platform[4]:
-                all_routes.append(find_direct_route(start,end,False))
+                all_routes.append(find_direct_route(start, end, False))
             elif start_platform[4] == 1 and end_platform[4] == 4:
-                all_routes.append((find_direct_route(start,14465,False),
-                                   find_direct_route(14530,end,False)))
+                all_routes.append((find_direct_route(start, 14465, False),
+                                   find_direct_route(14530, end, False)))
             elif start_platform[4] == 4 and end_platform[4] == 1:
-                all_routes.append((find_direct_route(start,14539,False),
-                                   find_direct_route(14406,end,False)))
+                all_routes.append((find_direct_route(start, 14539, False),
+                                   find_direct_route(14406, end, False)))
             elif start_platform[4] == 2 and end_platform[4] == 3:
-                all_routes.append((find_direct_route(start,14498,False),
-                                   find_direct_route(14546,end,False)))
+                all_routes.append((find_direct_route(start, 14498, False),
+                                   find_direct_route(14546, end, False)))
             elif start_platform[4] == 3 and end_platform[4] == 2:
-                all_routes.append((find_direct_route(start,14546,False),
-                                   find_direct_route(14498,end,False)))
+                all_routes.append((find_direct_route(start, 14546, False),
+                                   find_direct_route(14498, end, False)))
             elif start_platform[4] == 1 and end_platform[4] == 2:
-                bloor_distance = stop_distance(start,14414)
-                george_distance = stop_distance(start,14426)
+                bloor_distance = stop_distance(start, 14414)
+                george_distance = stop_distance(start, 14426)
                 if bloor_distance < george_distance:
-                    all_routes.append((find_direct_route(start,14414,False),
-                                       find_direct_route(14485,end,False)))
+                    all_routes.append((find_direct_route(start, 14414, False),
+                                       find_direct_route(14485, end, False)))
                 else:
-                    all_routes.append((find_direct_route(start,14426,False),
-                                       find_direct_route(14483,end,False)))
+                    all_routes.append((find_direct_route(start, 14426, False),
+                                       find_direct_route(14483, end, False)))
             elif start_platform[4] == 2 and end_platform[4] == 1:
-                bloor_distance = stop_distance(end,14414)
-                george_distance = stop_distance(end,14426)
+                bloor_distance = stop_distance(end, 14414)
+                george_distance = stop_distance(end, 14426)
                 if bloor_distance < george_distance:
-                    all_routes.append((find_direct_route(start,14485,False),
-                                       find_direct_route(14414,end,False)))
+                    all_routes.append((find_direct_route(start, 14485, False),
+                                       find_direct_route(14414, end, False)))
                 else:
-                    all_routes.append((find_direct_route(start,14483,False),
-                                       find_direct_route(14426,end,False)))
+                    all_routes.append((find_direct_route(start, 14483, False),
+                                       find_direct_route(14426, end, False)))
             elif start_platform[4] == 1 and end_platform[4] == 3:
-                bloor_distance = stop_distance(start,14414)
-                george_distance = stop_distance(start,14426)
+                bloor_distance = stop_distance(start, 14414)
+                george_distance = stop_distance(start, 14426)
                 if bloor_distance < george_distance:
-                    all_routes.append((find_direct_route(start,14414,False),
-                                       find_direct_route(14485,14498,False),
-                                       find_direct_route(14546,end,False)))
+                    all_routes.append((find_direct_route(start, 14414, False),
+                                       find_direct_route(14485, 14498, False),
+                                       find_direct_route(14546, end, False)))
                 else:
-                    all_routes.append((find_direct_route(start,14426,False),
-                                       find_direct_route(14483,14498,False),
-                                       find_direct_route(14546,end,False)))
+                    all_routes.append((find_direct_route(start, 14426, False),
+                                       find_direct_route(14483, 14498, False),
+                                       find_direct_route(14546, end, False)))
             elif start_platform[4] == 3 and end_platform[4] == 1:
-                bloor_distance = stop_distance(end,14414)
-                george_distance = stop_distance(end,14426)
+                bloor_distance = stop_distance(end, 14414)
+                george_distance = stop_distance(end, 14426)
                 if bloor_distance < george_distance:
-                    all_routes.append((find_direct_route(start,14546,False),
-                                       find_direct_route(14498,14485,False),
-                                       find_direct_route(14426,end,False)))
+                    all_routes.append((find_direct_route(start, 14546, False),
+                                       find_direct_route(14498, 14485, False),
+                                       find_direct_route(14426, end, False)))
                 else:
-                    all_routes.append((find_direct_route(start,14546,False),
-                                       find_direct_route(14498,14483,False),
-                                       find_direct_route(14426,end,False)))
+                    all_routes.append((find_direct_route(start, 14546, False),
+                                       find_direct_route(14498, 14483, False),
+                                       find_direct_route(14426, end, False)))
             elif start_platform[4] == 4 and end_platform[4] == 2:
-                all_routes.append((find_direct_route(start,14539,False),
-                                   find_direct_route(14406,14414,False),
-                                   find_direct_route(14485,end,False)))
+                all_routes.append((find_direct_route(start, 14539, False),
+                                   find_direct_route(14406, 14414, False),
+                                   find_direct_route(14485, end, False)))
             elif start_platform[4] == 2 and end_platform[4] == 4:
-                all_routes.append((find_direct_route(start,14485,False),
-                                   find_direct_route(14414,14406,False),
-                                   find_direct_route(14539,end,False)))
+                all_routes.append((find_direct_route(start, 14485, False),
+                                   find_direct_route(14414, 14406, False),
+                                   find_direct_route(14539, end, False)))
             elif start_platform[4] == 4 and end_platform[4] == 3:
-                all_routes.append((find_direct_route(start,14539,False),
-                                   find_direct_route(14406,14414,False),
-                                   find_direct_route(14485,14498,False),
-                                   find_direct_route(14546,end,False)))
+                all_routes.append((find_direct_route(start, 14539, False),
+                                   find_direct_route(14406, 14414, False),
+                                   find_direct_route(14485, 14498, False),
+                                   find_direct_route(14546, end, False)))
             elif start_platform[4] == 3 and end_platform[4] == 4:
-                all_routes.append((find_direct_route(start,14546,False),
-                                   find_direct_route(14498,14485,False),
-                                   find_direct_route(14414,14406,False),
-                                   find_direct_route(14539,end,False)))
+                all_routes.append((find_direct_route(start, 14546, False),
+                                   find_direct_route(14498, 14485, False),
+                                   find_direct_route(14414, 14406, False),
+                                   find_direct_route(14539, end, False)))
     for i in all_routes:
         print(i)
+
 
 os.system(clearTermial)
 
