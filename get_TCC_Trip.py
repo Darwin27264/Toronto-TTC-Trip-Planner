@@ -216,7 +216,7 @@ def find_closest_stop(start,end,used_stops):
         if stop_distance(end,int(i)) < stop_distance(end,closest) and int(i) != start and int(i) not in used_stops:
             s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': int(i)})
             stop_info = s.fetchone()
-            if len(binary_to_dict(stop_info[4])) >=3:
+            if len(binary_to_dict(stop_info[4])) >=4:
                 closest = int(i)
     used_stops.append(closest)
     return (closest,used_stops)
@@ -357,10 +357,16 @@ else:
         print(closest_to_end)
         near = nearby_stops(end_subway)
         test = close_to_end(closest_to_end[0],near)
+        closest_to_end = find_closest_stop(closest_to_end[0],info.ending_stop.stop_id,closest_to_end[1])
+        print(closest_to_end)
+        near = nearby_stops(closest_to_end[0])
+        test1 = close_to_end(closest_to_end[0],near)
         test2 = find_direct_route(closest_to_end[0],info.ending_stop.stop_id,True)
         print(test)
+        print(test1)
         print(test2)
-        from_end_subway = test + test2
+        from_end_subway = test + test1 +test2
+    print("--------------------------------")
     print(to_start_subway)
     print("--------------------------------")
     print(subway)
