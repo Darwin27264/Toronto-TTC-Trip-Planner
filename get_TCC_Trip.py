@@ -202,16 +202,24 @@ def make_stops_dict(stop):
             route = r.fetchone()
             for j in binary_to_dict(route[4]):
                 all_stops[j] = 0
-    print(all_stops)
     return all_stops
 
-def find_closest_stop(start,end):
+def find_closest_stop(start,end,used_stops):
     dict_stops = make_stops_dict(start)
-    closest = int(next(iter(dict_stops)))
+    if int(list(dict_stops)[0]) != start and int(list(dict_stops)[0]) not in used_stops:
+        closest = int(list(dict_stops)[0])
+    elif int(list(dict_stops)[1]) not in used_stops:
+        closest = int(list(dict_stops)[1])
+    else: 
+        closest = int(list(dict_stops)[2])
     for i in dict_stops:
-        if stop_distance(end,int(i)) < stop_distance(end,closest):
-            closest = int(i)
-    return closest
+        if stop_distance(end,int(i)) < stop_distance(end,closest) and int(i) != start and int(i) not in used_stops:
+            s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': int(i)})
+            stop_info = s.fetchone()
+            if len(binary_to_dict(stop_info[4])) >=3:
+                closest = int(i)
+    used_stops.append(closest)
+    return (closest,used_stops)
                
 
 def find_closest_subway(stop):
@@ -334,8 +342,10 @@ if len(direct_routes)!=0:
     for i in direct_routes:
         print(i)
 else:
+    print("No Direct Routes Found ... Looking for subway path ...")
     start_subway = find_closest_subway(info.starting_stop.stop_id)
     end_subway = find_closest_subway(info.ending_stop.stop_id)
+    print(end_subway)
     subway = navigate_subway(start_subway,end_subway)
     to_start_subway = find_direct_route(info.starting_stop.stop_id,start_subway,True)
     if to_start_subway == []:
@@ -343,9 +353,11 @@ else:
         to_start_subway = find_direct_route(info.starting_stop.stop_id,closest_to_start,False)+ find_direct_route(closest_to_start,start_subway,True)
     from_end_subway = find_direct_route(end_subway,info.ending_stop.stop_id,True)
     if from_end_subway == []:
-        closest_to_end = find_closest_stop(end_subway,info.ending_stop.stop_id)
-        test = find_direct_route(end_subway,closest_to_end,True)
-        test2 = find_direct_route(closest_to_end,info.ending_stop.stop_id,True)
+        closest_to_end = find_closest_stop(end_subway,info.ending_stop.stop_id,[])
+        print(closest_to_end)
+        near = nearby_stops(end_subway)
+        test = close_to_end(closest_to_end[0],near)
+        test2 = find_direct_route(closest_to_end[0],info.ending_stop.stop_id,True)
         print(test)
         print(test2)
         from_end_subway = test + test2
