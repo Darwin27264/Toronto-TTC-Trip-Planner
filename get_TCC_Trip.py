@@ -341,31 +341,35 @@ def truncate_walk_steps(steps):
 
     truncate_beginning_index = find_all_walks(steps)
 
-    for i in steps[:truncate_beginning_index[0]]:
-        cleaned_steps.append(i)
+    if len(truncate_beginning_index) != 0:
+        for i in steps[:truncate_beginning_index[0]]:
+            cleaned_steps.append(i)
 
-    for every_tru in truncate_beginning_index:
+        for every_tru in truncate_beginning_index:
 
-        ending_index = 0
-        index = every_tru
+            ending_index = 0
+            index = every_tru
 
-        for step in steps[every_tru:]:
+            for step in steps[every_tru:]:
 
-            if type(step[0]) != tuple and step[0][3] != -1:
-                ending_index = index - 1
-                break
-            else:
-                ending_index = index
-            index += 1
+                if type(step[0]) != tuple and step[0][3] != -1:
+                    ending_index = index - 1
+                    break
+                else:
+                    ending_index = index
+                index += 1
 
-        new_walk_instru = [(steps[every_tru][0][0], steps[ending_index][0][1], 'walking', -1)]
+            new_walk_instru = [(steps[every_tru][0][0], steps[ending_index][0][1], 'walking', -1)]
 
-        cleaned_steps.append(new_walk_instru)
+            cleaned_steps.append(new_walk_instru)
 
-        if every_tru != truncate_beginning_index[-1]:
-            for the_rest in steps[
-                            ending_index + 1:truncate_beginning_index[truncate_beginning_index.index(every_tru) + 1]]:
-                cleaned_steps.append(the_rest)
+            if every_tru != truncate_beginning_index[-1]:
+                for the_rest in steps[
+                                ending_index + 1:truncate_beginning_index[
+                                    truncate_beginning_index.index(every_tru) + 1]]:
+                    cleaned_steps.append(the_rest)
+    else:
+        return steps
 
     return cleaned_steps
 
@@ -407,6 +411,39 @@ def flatten_tuple_recur(tuple_to_flat, list_of_tuple):
         flatten_tuple_recur(tuple_to_flat[0], list_of_tuple)
     else:
         list_of_tuple.append(tuple_to_flat)
+
+    return list_of_tuple
+
+
+def flatten_tuple_in_sub(tuple_to_flat):
+    list_of_tuple = []
+
+    list_tuple = flatten_tuple_in_sub_recur(tuple_to_flat, list_of_tuple)
+    list_tuple.reverse()
+
+    list_out = []
+
+    for i in list_tuple:
+        if type(i) == list:
+            for j in i:
+                list_out.append(j)
+        else:
+            list_out.append(i)
+
+    return list_out
+
+
+def flatten_tuple_in_sub_recur(tuple_to_flat, list_of_tuple):
+    if type(tuple_to_flat[0]) != list:
+        if type(tuple_to_flat[1]) == tuple:
+            list_of_tuple.append(tuple_to_flat[1])
+            flatten_tuple_in_sub_recur(tuple_to_flat[0], list_of_tuple)
+        else:
+            list_of_tuple.append(tuple_to_flat)
+    else:
+        var = tuple_to_flat[0]
+        list_of_tuple.append(tuple_to_flat[1])
+        list_of_tuple.append(var)
 
     return list_of_tuple
 
@@ -485,8 +522,9 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
         j += 1
 
     for every_sub in to_sub_final:
-        in_sub_final.append(flatten_tuple(every_sub))
+        in_sub_final.append(flatten_tuple_in_sub(every_sub))
 
+    print(in_sub_final[0])
     print("Total permutation going to and within the subway: " + str(len(in_sub_final)))
 
     # Finds all permutations to the final destination from the subway
@@ -496,7 +534,8 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
     unique_combinations = []
 
     while i < len(from_sub):
-        if type((in_sub_final[i][0])) == tuple:
+
+        if type((from_sub[i][0])) == tuple:
 
             exp_temp = [(from_sub[i][0])]
 
@@ -505,6 +544,7 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
 
             in_sub_final = unique_combinations
             unique_combinations = []
+
         else:
             for r in itertools.product(in_sub_final, from_sub[i][0]):
                 unique_combinations.append(r)
@@ -515,7 +555,9 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
         i += 1
 
     for each_sub in in_sub_final:
-        all_pos_routes.append(flatten_tuple(each_sub))
+        # print("flattening")
+        # print(each_sub)
+        all_pos_routes.append(flatten_tuple_in_sub(each_sub))
 
     print("Total ways to go from initial location to destination: " + str(len(all_pos_routes)))
     print(all_pos_routes[0])
