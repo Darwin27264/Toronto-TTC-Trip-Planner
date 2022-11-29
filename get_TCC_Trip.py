@@ -569,19 +569,29 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
 
 os.system(clearTermial)
 
+# final output
+all_routes = []
 # User input test
 # info = get_input()
 # test case
-# info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
+info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((14238, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
-info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
+# info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((465, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 print_info(info)
 direct_routes = [find_direct_route(info.starting_stop.stop_id, info.ending_stop.stop_id, True)]
 if direct_routes[0] != [[]]:
     for i in direct_routes:
         print(i)
+
+        if type(i[0]) == list:
+            for j in i[0]:
+                all_routes.append(j)
+        else:
+            all_routes.append(i[0])
+
     print("--------------------------------")
+
 else:
     print("No Direct Routes Found ...\n\nLooking for subway path ...\n")
     start_subway = find_closest_subway(info.starting_stop.stop_id)
@@ -645,14 +655,11 @@ else:
 
     print("--------------------------------\n")
 
-    all_routes = []
-
     if type(to_start_subway[0]) == tuple:
         all_routes = all_routes_finder([to_start_subway], subway, from_end_subway)
     else:
         all_routes = all_routes_finder(to_start_subway, subway, from_end_subway)
 
-    for i in all_routes:
-        print(i)
-
+for i in all_routes:
+    print(i)
 print("--------------------------------")
