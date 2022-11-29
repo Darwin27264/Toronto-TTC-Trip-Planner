@@ -65,7 +65,7 @@ def start_to_close(start, near_end_stops):
         route = r.fetchone()
         for j in near_end_stops:
             if str(j) in binary_to_dict(route[4]):
-                valid_routes.append((start, j, "start_to_close", route[1], route[2]))
+                valid_routes.append((start, j, "start_to_close", route[0], route[2]))
     return valid_routes
 
 
@@ -94,7 +94,7 @@ def close_to_end(end, near_start_stops):
             r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': j})
             route = r.fetchone()
             if str(end) in binary_to_dict(route[4]):
-                valid_routes.append((i, end, "close_to_end", route[1], route[2]))
+                valid_routes.append((i, end, "close_to_end", route[0], route[2]))
     return valid_routes
 
 
@@ -126,7 +126,7 @@ def close_to_close(near_start_stops, near_end_stops):
             route = r.fetchone()
             for k in near_end_stops:
                 if str(k) in binary_to_dict(route[4]):
-                    valid_routes.append((i, k, "close_to_close", route[1], route[2]))
+                    valid_routes.append((i, k, "close_to_close", route[0], route[2]))
     return valid_routes
 
 
@@ -186,7 +186,7 @@ def find_direct_route(start, end, val):
     for i in binary_to_dict(starting_point[4]):
         r.execute("SELECT * FROM routes WHERE route_id=:route_id", {'route_id': i})
         route = r.fetchone()
-        if str(end) in binary_to_dict(route[4]): valid_routes.append((start, end, 'direct', route[1], route[2]))
+        if str(end) in binary_to_dict(route[4]): valid_routes.append((start, end, 'direct', route[0], route[2]))
     if val:
         close_routes = find_close_direct_route(start, end)
         return_list.append(valid_routes + close_routes)
