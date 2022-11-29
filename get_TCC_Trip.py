@@ -645,8 +645,14 @@ else:
 
     print("--------------------------------\n")
 
-    all_routes_finder([to_start_subway], subway, from_end_subway)
-    for i in all_routes_finder([to_start_subway], subway, from_end_subway):
+    all_routes = []
+
+    if type(to_start_subway[0]) == tuple:
+        all_routes = all_routes_finder([to_start_subway], subway, from_end_subway)
+    else:
+        all_routes = all_routes_finder(to_start_subway, subway, from_end_subway)
+
+    for i in all_routes:
         print(i)
 
 print("--------------------------------")
