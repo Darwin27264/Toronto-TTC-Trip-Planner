@@ -586,9 +586,9 @@ if direct_routes[0] != [[]]:
 
         if type(i[0]) == list:
             for j in i[0]:
-                all_routes.append(j)
+                all_routes.append([j])
         else:
-            all_routes.append(i[0])
+            all_routes.append([i[0]])
 
     print("--------------------------------")
 
