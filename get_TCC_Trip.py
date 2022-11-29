@@ -498,8 +498,12 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
             # print("\n")
         i += 1
 
-    for each_sub in to_sub_all:
-        to_sub_final.append(flatten_tuple(each_sub))
+    if type(to_sub_all) != tuple:
+        for each_sub in to_sub_all:
+            to_sub_final.append(flatten_tuple(each_sub))
+    else:
+        to_sub_final.append(to_sub_all)
+
     print("Total ways to go to the subway station from starting location: " + str(len(to_sub_final)))
 
     # Finds all permutations in the subway
@@ -630,8 +634,6 @@ else:
         from_end_subway = route_to_end
     route = []
 
-    all_routes_finder(to_start_subway, subway, from_end_subway)
-
     print("--------------------------------")
     for i in to_start_subway:
         print(i)
@@ -642,4 +644,8 @@ else:
     for i in from_end_subway:
         print(i)
 
+    print("--------------------------------\n")
+
+    for i in all_routes_finder([to_start_subway], subway, from_end_subway):
+        print(i)
 print("--------------------------------")
