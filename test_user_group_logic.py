@@ -67,9 +67,12 @@ if __name__ == "__main__":
     T = T.compile()
     # After compilation (and only after), you can check some of the properties
     # of your model:
-    print("\nSatisfiable: %s" % T.satisfiable())
-    print("# Solutions: %d" % count_solutions(T))
+    # print("\nSatisfiable: %s" % T.satisfiable())
+    # print("# Solutions: %d" % count_solutions(T))
+
     print("   Solution: %s" % T.solve())
+    print("   Number of Solutions: %s" % T.model_count())
+
 
     print("\nVariable likelihoods:")
     for v,vn in zip([kid,adult,youth,senior,presto,presto_youth,presto_adult,presto_senior,presto_other,presto_day_pass,surpass_normal_price,within_budget],
