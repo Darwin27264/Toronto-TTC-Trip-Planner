@@ -28,19 +28,10 @@ presto_day_pass = budget_prop('buy presto day pass')
 surpass_normal_price = budget_prop('cheaper to go with day pass')
 within_budget = budget_prop('trip plan is within budget')
 
-
+kid,adult,youth,senior,presto,presto_youth,presto_adult,presto_senior,presto_other,presto_day_pass,surpass_normal_price,within_budget
 def example_theory():
     hasPresto = False
     age = 19
-
-    # User must be fall into one of the age groups
-    E.add_constraint(adult | youth | senior | kid)
-    # The user may only fall into one age group at a time
-    constraint.add_exactly_one(E, adult, youth, senior, kid)
-
-    # If the user is not a Presto holder
-    if not hasPresto:
-        E.add_constraint(~presto)
 
     # Determining and adding the user to an age group
     if age <= 12:
@@ -52,6 +43,13 @@ def example_theory():
         E.add_constraint(~(~adult))
     else:
         E.add_constraint(~(~senior))
+
+    # The user may only fall into one age group at a time
+    constraint.add_exactly_one(E, adult, youth, senior, kid)
+
+    # If the user is not a Presto holder
+    if not hasPresto:
+        E.add_constraint(~presto)
 
     E.add_constraint(~(presto & (youth | senior) | presto_other))
     E.add_constraint(~(presto & adult) | presto_adult)
@@ -72,10 +70,11 @@ if __name__ == "__main__":
     print("\nSatisfiable: %s" % T.satisfiable())
     print("# Solutions: %d" % count_solutions(T))
     print("   Solution: %s" % T.solve())
-    #
-    # print("\nVariable likelihoods:")
-    # for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
-    #     # Ensure that you only send these functions NNF formulas
-    #     # Literals are compiled to NNF here
-    #     print(" %s: %.2f" % (vn, likelihood(T, v)))
+
+    print("\nVariable likelihoods:")
+    for v,vn in zip([kid,adult,youth,senior,presto,presto_youth,presto_adult,presto_senior,presto_other,presto_day_pass,surpass_normal_price,within_budget],
+                    'kidadultyouthseniorprestopresto_youthpresto_adultpresto_seniorpresto_otherpresto_day_passsurpass_normal_pricewithin_budget'):
+        # Ensure that you only send these functions NNF formulas
+        # Literals are compiled to NNF here
+        print(" %s: %.2f" % (vn, likelihood(T, v)))
     print()
