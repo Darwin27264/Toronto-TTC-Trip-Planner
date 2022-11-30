@@ -1,5 +1,5 @@
 from bauhaus import Encoding, proposition, constraint
-from bauhaus.utils import count_solutions, likelihood
+from bauhaus.utils import likelihood
 
 # Encoding that will store all of your constraints
 E = Encoding()
@@ -28,7 +28,7 @@ normal_adult = budget_prop('normal user (adult)')
 normal_other = budget_prop('normal user (others)')
 
 presto_adult = budget_prop('presto user (adult)')
-presto_other = budget_prop('presto users (not adults)')
+presto_other = budget_prop('presto user (others)')
 
 presto_day_pass = budget_prop('buy presto day pass')
 surpass_normal_price = budget_prop('cheaper to go with day pass')
@@ -67,6 +67,24 @@ def example_theory(hasPresto, age):
     return E
 
 
+def price_grp_define(logic_dict):
+    price_group_all = [kid, presto_adult, presto_other, normal_adult, normal_other]
+
+    logic_results = {}
+
+    final = ""
+
+    for i in price_group_all:
+        logic_results[i] = logic_dict[i]
+
+    if logic_results[kid]:
+        final = {kid}
+    else:
+        final = {i for i in logic_results if logic_results[i]}
+
+    return final
+
+
 def main(test_Presto, test_age):
     print("\nConditions:")
     print(str(test_Presto) + ", " + str(test_age))
@@ -79,9 +97,12 @@ def main(test_Presto, test_age):
     print("\nSatisfiable: %s" % T.satisfiable())
     # print("# Solutions: %d" % count_solutions(T))
     print("   Number of Solutions: %s" % T.model_count())
-    print("   Solution: %s" % T.solve())
 
-    print(type(T.solve()))
+    budget_solution = T.solve()
+
+    print("   Solution: %s" % budget_solution)
+    # find the specific price group
+    print(price_grp_define(budget_solution))
 
     print("\nVariable likelihoods:")
     for v, vn in zip(
