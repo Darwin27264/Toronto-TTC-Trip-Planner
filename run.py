@@ -77,6 +77,9 @@ within_budget = budget_prop('trip plan is within budget')
 # Time
 within_time_constraint = time_prop('within time constraint')
 rush_hour = time_prop('rush hour')
+valid_trip = time_prop('valid trip')
+start_time = time_prop('start time')
+end_time = time_prop('end time')
 # Additional Stops Requested
 additional_stops = add_stops_prop('additional stops')
 
@@ -86,8 +89,10 @@ additional_stops = add_stops_prop('additional stops')
 #  There should be at least 10 variables, and a sufficiently large formula to describe it (>50 operators).
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
-def example_theory():
+def example_theory(additional_stops_budget_surpass=None):
+
     E = Encoding()
+    T = Encoding()
 
     # Reference Code found here:
     # https://github.com/beckydvn/modelling-project-remaster/blob/main/modelling-project-original-and-remaster/modelling-project-1-REMASTER-2.0/run.py
@@ -112,28 +117,57 @@ def example_theory():
     else:
         E.add_constraint(~(~senior))
 
-    E.add_constraint(~(presto & youth) | presto_youth)
+    E.add_constraint(~(presto & (youth | senior) | presto_other))
     E.add_constraint(~(presto & adult) | presto_adult)
-    E.add_constraint(~(presto & senior) | presto_senior)
+    E.add_constraint(~presto | ~kid)
 
-    constraint.add_exactly_one(E, presto_youth, presto_adult, presto_senior)
+    constraint.add_exactly_one(E, presto_other, presto_adult)
+
+    # the maximum expenditure calculated by the algorithm and compare with user's budget
+    expenditure = ''
+    budget = ''
+    if expenditure > budget:
+        E.add_constraint(~within_budget)
+        E.add_constraint(~valid_trip)
+    else:
+        E.add_constraint(within_budget)
+
+    # Traffic operation time
+    T.add_constraint(start_time | ~valid_trip)
+    T.add_constraint(end_time | ~valid_trip)
+
+    # Compare the user defined time with the algorithm given time
+    user_defined_time_s = user_input
+    user_defined_time_e = ''
+    given_st = ''
+    given_et = ''
+    if given_st < user_defined_time_s:
+        T.add_constraint(~valid_trip)
+    elif given_et > user_defined_time_e:
+        T.add_constraint(~valid_trip)
+    else:
+        T.add_constraint(within_time_constraint)
 
     # Rush Hour constraints
     # this needs more work
     if not route_within_rh:
-        E.add_constraint(~rush_hour)
+        T.add_constraint(~rush_hour)
+        T.add_constraint(~valid_trip | within_time_constraint & within_budget & ~rush_hour)
 
-    # Additional stops constraints
-    if not additional_stops_budget_surpass:
-        E.add_constraint(~(~surpass_normal_price))
+    # # Additional stops constraints
 
-        E.add_constraint(~surpass_normal_price | presto_day_pass)
-
-    # Main/final constraint, all must satisfy route to be valid
-    E.add_constraint(additional_stops & (within_time_constraint | within_budget))
+    # if not additional_stops_budget_surpass:
+    #     E.add_constraint(~(~surpass_normal_price))
+    #
+    #     E.add_constraint(~surpass_normal_price | presto_day_pass)
+    #
+    # # Main/final constraint, all must satisfy route to be valid
+    # E.add_constraint(additional_stops & (within_time_constraint & within_budget))
 
     # Add custom constraints by creating formulas with the variables you created.
     # E.add_constraint((a | b) & ~x)
+
+
     # # Implication
     # E.add_constraint(y >> z)
     # # Negate a formula
@@ -141,6 +175,7 @@ def example_theory():
     # # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
     # # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
     # constraint.add_exactly_one(E, a, b, c)
+
 
     return E
 
