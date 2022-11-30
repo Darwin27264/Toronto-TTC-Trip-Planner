@@ -1,20 +1,9 @@
-from bauhaus import Encoding, proposition, constraint
-from bauhaus.utils import count_solutions, likelihood
-
-# Some custom imports including time, SQLite， unzipper
-from datetime import datetime
+# import SQLite
 import sqlite3
-import json
-import os.path
-import geocoder
 
-# importing geopy library
-from geopy.geocoders import Nominatim
-from geopy import distance
-
+from bauhaus import Encoding, proposition, constraint
 # These two lines make sure a faster SAT solver is used.
 from nnf import config
-from nnf import Var
 
 from get_User_Input import get_input, route_within_rh
 
@@ -32,15 +21,17 @@ config.sat_backend = "kissat"
 
 # Encoding that will store all of your constraints
 global E
+global T
 
 global user_input
+
 
 # Class for Budget propositions
 @proposition(E)
 class budget_prop:
     # instantiate with name to be given to the proposition
     def __init__(self, name):
-        self = name
+        self.name = name
 
 
 # class for Time propositions
@@ -48,29 +39,25 @@ class budget_prop:
 class time_prop:
     # instantiate with name to be given to the proposition
     def __init__(self, name):
-        self = name
-
-
-# class for Additional Stops propositions
-@proposition(E)
-class add_stops_prop:
-    # instantiate with name to be given to the proposition
-    def __init__(self, name):
-        self = name
+        self.name = name
 
 
 # Declaring Propositions
 
 # Budget
-kid = budget_prop('kids/children')
+kid = budget_prop('kid')
 adult = budget_prop('adult')
 youth = budget_prop('youth')
 senior = budget_prop('senior')
+
 presto = budget_prop('presto user')
+
+normal_adult = budget_prop('normal user (adult)')
+normal_other = budget_prop('normal user (others)')
+
 presto_adult = budget_prop('presto user (adult)')
-presto_youth = budget_prop('presto user (youth)')
-presto_senior = budget_prop('presto user (senior)')
-presto_other=  budget_prop('presto users (not adults)')
+presto_other = budget_prop('presto users (not adults)')
+
 presto_day_pass = budget_prop('buy presto day pass')
 surpass_normal_price = budget_prop('cheaper to go with day pass')
 within_budget = budget_prop('trip plan is within budget')
@@ -80,8 +67,6 @@ rush_hour = time_prop('rush hour')
 valid_trip = time_prop('valid trip')
 start_time = time_prop('start time')
 end_time = time_prop('end time')
-# Additional Stops Requested
-additional_stops = add_stops_prop('additional stops')
 
 
 # Build an example full theory for your setting and return it.
@@ -89,39 +74,42 @@ additional_stops = add_stops_prop('additional stops')
 #  There should be at least 10 variables, and a sufficiently large formula to describe it (>50 operators).
 #  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
 #  what the expectations are.
-def example_theory(additional_stops_budget_surpass=None):
-
+def example_theory(hasPresto, age):
     E = Encoding()
     T = Encoding()
 
     # Reference Code found here:
     # https://github.com/beckydvn/modelling-project-remaster/blob/main/modelling-project-original-and-remaster/modelling-project-1-REMASTER-2.0/run.py
 
-    # User must be fall into one of the age groups
-    E.add_constraint(adult | youth | senior | kid)
-    # The user may only fall into one age group at a time
-    constraint.add_exactly_one(E, adult, youth, senior, kid)
-
-    # If the user is not a Presto holder
-    if not user_input.hasPresto:
+    # Determining and adding the user to an age group
+    if age <= 12:
+        E.add_constraint(kid)
         E.add_constraint(~presto)
 
-    # Determining and adding the user to an age group
-    if user_input.age <= 12:
-        E.add_constraint(~(~kid))
-        E.add_constraint(~(~within_budget))
-    elif 13 <= user_input.age <= 19:
-        E.add_constraint(~(~youth))
-    elif 20 <= user_input.age < 65:
-        E.add_constraint(~(~adult))
+    elif 13 <= age <= 19:
+        E.add_constraint(youth)
+    elif 20 <= age < 65:
+        E.add_constraint(adult)
     else:
-        E.add_constraint(~(~senior))
+        E.add_constraint(senior)
 
-    E.add_constraint(~(presto & (youth | senior) | presto_other))
-    E.add_constraint(~(presto & adult) | presto_adult)
-    E.add_constraint(~presto | ~kid)
+    # If the user is not a Presto holder
+    if not hasPresto:
+        # Not a Presto user means that they either falls into
+        # the normal_adult or the normal_other price group
+        E.add_constraint(~presto)
+        E.add_constraint(~adult | normal_adult)
+        E.add_constraint(adult | normal_other)
+    else:
+        E.add_constraint(presto)
+        E.add_constraint(~adult | presto_adult)
+        E.add_constraint(adult | presto_other)
 
-    constraint.add_exactly_one(E, presto_other, presto_adult)
+    # The user may only fall into one age group at a time
+    constraint.add_exactly_one(E, adult, youth, senior, kid)
+    constraint.add_exactly_one(E, presto_adult, presto_other, normal_adult, normal_other)
+
+    return E
 
     # the maximum expenditure calculated by the algorithm and compare with user's budget
     expenditure = ''
@@ -154,20 +142,6 @@ def example_theory(additional_stops_budget_surpass=None):
         T.add_constraint(~rush_hour)
         T.add_constraint(~valid_trip | within_time_constraint & within_budget & ~rush_hour)
 
-    # # Additional stops constraints
-
-    # if not additional_stops_budget_surpass:
-    #     E.add_constraint(~(~surpass_normal_price))
-    #
-    #     E.add_constraint(~surpass_normal_price | presto_day_pass)
-    #
-    # # Main/final constraint, all must satisfy route to be valid
-    # E.add_constraint(additional_stops & (within_time_constraint & within_budget))
-
-    # Add custom constraints by creating formulas with the variables you created.
-    # E.add_constraint((a | b) & ~x)
-
-
     # # Implication
     # E.add_constraint(y >> z)
     # # Negate a formula
@@ -175,7 +149,6 @@ def example_theory(additional_stops_budget_surpass=None):
     # # You can also add more customized "fancy" constraints. Use case: you don't want to enforce "exactly one"
     # # for every instance of BasicPropositions, but you want to enforce it for a, b, and c.:
     # constraint.add_exactly_one(E, a, b, c)
-
 
     return E
 
