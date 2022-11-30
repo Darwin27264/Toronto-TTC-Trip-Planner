@@ -1,5 +1,5 @@
 from bauhaus import Encoding, proposition, constraint
-from bauhaus.utils import likelihood
+from bauhaus.utils import count_solutions, likelihood
 
 # Encoding that will store all of your constraints
 E = Encoding()
@@ -68,11 +68,20 @@ def example_theory(hasPresto, age):
 
 
 def price_grp_define(logic_dict):
+    """
+    Finds the specific price group and price from
+    the logic solution
+
+    Args:
+        logic_dict (dictionary): logic solution
+
+    Returns:
+        Price group and price per ride
+    """
     price_group_all = [kid, presto_adult, presto_other, normal_adult, normal_other]
+    pricing = [0.0, 3.20, 2.25, 3.25, 2.30]
 
     logic_results = {}
-
-    final = ""
 
     for i in price_group_all:
         logic_results[i] = logic_dict[i]
@@ -82,7 +91,11 @@ def price_grp_define(logic_dict):
     else:
         final = {i for i in logic_results if logic_results[i]}
 
-    return final
+    for i in final:
+        price = pricing[price_group_all.index(i)]
+        break
+
+    return (final, price)
 
 
 def main(test_Presto, test_age):
