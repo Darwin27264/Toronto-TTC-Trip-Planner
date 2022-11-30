@@ -105,7 +105,7 @@ def main(test_Presto, test_age):
     T = example_theory(test_Presto, test_age)
     # Don't compile until you're finished adding all your constraints!
     T = T.compile()
-    # After compilation (and only after), you can check some of the properties
+    # After compilation (and only after), you can check some properties
     # of your model:
     print("\nSatisfiable: %s" % T.satisfiable())
     # print("# Solutions: %d" % count_solutions(T))
