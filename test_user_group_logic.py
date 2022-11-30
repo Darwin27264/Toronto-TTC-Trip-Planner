@@ -40,7 +40,7 @@ def example_theory():
 
     # If the user is not a Presto holder
     if not hasPresto:
-        E.add_constraint(~presto)
+        E.add_constraint(presto)
 
     # Determining and adding the user to an age group
     if age <= 12:
