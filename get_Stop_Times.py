@@ -11,12 +11,12 @@ s = data_stop.cursor()
 data_subway = sqlite3.connect('subway.db')
 m = data_subway.cursor()
 
-# sample_output = [(3169, 14242, 'start_to_close', 61329, 3), (14529, 14498, 'direct', 61457, 1),
-#                  (14546, 14552, 'direct', 61458, 1), (9276, 8000, 'close_to_end', 61363, 3),
-#                  (4049, 574, 'close_to_close', 61367, 3), (9230, 467, 'close_to_close', 61431, 3)]
-sample_output = [(14529, 14498, 'direct', 61457, 1),
+sample_output = [(3169, 14242, 'start_to_close', 61329, 3), (14529, 14498, 'direct', 61457, 1),
                  (14546, 14552, 'direct', 61458, 1), (9276, 8000, 'close_to_end', 61363, 3),
                  (4049, 574, 'close_to_close', 61367, 3), (9230, 467, 'close_to_close', 61431, 3)]
+# sample_output = [(14529, 14498, 'direct', 61457, 1),
+#                  (14546, 14552, 'direct', 61458, 1), (9276, 8000, 'close_to_end', 61363, 3),
+#                  (4049, 574, 'close_to_close', 61367, 3), (9230, 467, 'close_to_close', 61431, 3)]
 
 
 def get_stop_times(one_possible_route):
@@ -61,8 +61,6 @@ def get_stop_times(one_possible_route):
             times.append(time_out)
 
         one_possible_route_wt_time.append((step, times))
-
-        break
 
     return one_possible_route_wt_time
 
