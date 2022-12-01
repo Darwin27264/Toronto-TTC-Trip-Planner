@@ -255,84 +255,84 @@ def navigate_subway(start, end):
             start_platform = i
             end_platform = j
             if start_platform[4] == end_platform[4]:
-                route = (find_direct_route(start, end, False))
+                route = (find_direct_route(start, end, True))
             elif start_platform[4] == 1 and end_platform[4] == 4:
-                route = (find_direct_route(start, 14465, False),
-                         find_direct_route(14530, end, False))
+                route = (find_direct_route(start, 14465, True),
+                         find_direct_route(14530, end, True))
             elif start_platform[4] == 4 and end_platform[4] == 1:
-                route = (find_direct_route(start, 14539, False),
-                         find_direct_route(14406, end, False))
+                route = (find_direct_route(start, 14539, True),
+                         find_direct_route(14406, end, True))
             elif start_platform[4] == 2 and end_platform[4] == 3:
-                route = (find_direct_route(start, 14498, False),
-                         find_direct_route(14546, end, False))
+                route = (find_direct_route(start, 14498, True),
+                         find_direct_route(14546, end, True))
             elif start_platform[4] == 3 and end_platform[4] == 2:
-                route = (find_direct_route(start, 14546, False),
-                         find_direct_route(14498, end, False))
+                route = (find_direct_route(start, 14546, True),
+                         find_direct_route(14498, end, True))
             elif start_platform[4] == 1 and end_platform[4] == 2:
                 bloor_distance = stop_distance(start, 14414)
                 george_distance = stop_distance(start, 14426)
                 if bloor_distance < george_distance:
-                    route = (find_direct_route(start, 14414, False),
-                             find_direct_route(14485, end, False))
+                    route = (find_direct_route(start, 14414, True),
+                             find_direct_route(14485, end, True))
                 else:
-                    route = (find_direct_route(start, 14426, False),
-                             find_direct_route(14483, end, False))
+                    route = (find_direct_route(start, 14426, True),
+                             find_direct_route(14483, end, True))
             elif start_platform[4] == 2 and end_platform[4] == 1:
                 bloor_distance = stop_distance(end, 14414)
                 george_distance = stop_distance(end, 14426)
                 if bloor_distance < george_distance:
-                    route = (find_direct_route(start, 14485, False),
-                             find_direct_route(14414, end, False))
+                    route = (find_direct_route(start, 14485, True),
+                             find_direct_route(14414, end, True))
                 else:
-                    route = (find_direct_route(start, 14483, False),
-                             find_direct_route(14426, end, False))
+                    route = (find_direct_route(start, 14483, True),
+                             find_direct_route(14426, end, True))
             elif start_platform[4] == 1 and end_platform[4] == 3:
                 bloor_distance = stop_distance(start, 14414)
                 george_distance = stop_distance(start, 14426)
                 if bloor_distance < george_distance:
-                    route = (find_direct_route(start, 14414, False),
-                             find_direct_route(14485, 14498, False),
-                             find_direct_route(14546, end, False))
+                    route = (find_direct_route(start, 14414, True),
+                             find_direct_route(14485, 14498, True),
+                             find_direct_route(14546, end, True))
                 else:
-                    route = (find_direct_route(start, 14426, False),
-                             find_direct_route(14483, 14498, False),
-                             find_direct_route(14546, end, False))
+                    route = (find_direct_route(start, 14426, True),
+                             find_direct_route(14483, 14498, True),
+                             find_direct_route(14546, end, True))
             elif start_platform[4] == 3 and end_platform[4] == 1:
                 bloor_distance = stop_distance(end, 14414)
                 george_distance = stop_distance(end, 14426)
                 if bloor_distance < george_distance:
-                    route = (find_direct_route(start, 14546, False),
-                             find_direct_route(14498, 14485, False),
-                             find_direct_route(14426, end, False))
+                    route = (find_direct_route(start, 14546, True),
+                             find_direct_route(14498, 14485, True),
+                             find_direct_route(14426, end, True))
                 else:
-                    route = (find_direct_route(start, 14546, False),
-                             find_direct_route(14498, 14483, False),
-                             find_direct_route(14426, end, False))
+                    route = (find_direct_route(start, 14546, True),
+                             find_direct_route(14498, 14483, True),
+                             find_direct_route(14426, end, True))
             elif start_platform[4] == 4 and end_platform[4] == 2:
-                route = (find_direct_route(start, 14539, False),
-                         find_direct_route(14406, 14414, False),
-                         find_direct_route(14485, end, False))
+                route = (find_direct_route(start, 14539, True),
+                         find_direct_route(14406, 14414, True),
+                         find_direct_route(14485, end, True))
             elif start_platform[4] == 2 and end_platform[4] == 4:
-                route = (find_direct_route(start, 14485, False),
-                         find_direct_route(14414, 14406, False),
-                         find_direct_route(14539, end, False))
+                route = (find_direct_route(start, 14485, True),
+                         find_direct_route(14414, 14406, True),
+                         find_direct_route(14539, end, True))
             elif start_platform[4] == 4 and end_platform[4] == 3:
-                route = (find_direct_route(start, 14539, False),
-                         find_direct_route(14406, 14414, False),
-                         find_direct_route(14485, 14498, False),
-                         find_direct_route(14546, end, False))
+                route = (find_direct_route(start, 14539, True),
+                         find_direct_route(14406, 14414, True),
+                         find_direct_route(14485, 14498, True),
+                         find_direct_route(14546, end, True))
             elif start_platform[4] == 3 and end_platform[4] == 4:
-                route = (find_direct_route(start, 14546, False),
-                         find_direct_route(14498, 14485, False),
-                         find_direct_route(14414, 14406, False),
-                         find_direct_route(14539, end, False))
+                route = (find_direct_route(start, 14546, True),
+                         find_direct_route(14498, 14485, True),
+                         find_direct_route(14414, 14406, True),
+                         find_direct_route(14539, end, True))
     for i in route:
         all_routes.append(i)
 
     valid_routes = []
     for i in all_routes:
         if [] not in i:
-            valid_routes.append(i[0])
+            valid_routes.append([i[0]])
     return valid_routes
 
 
