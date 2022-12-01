@@ -5,7 +5,7 @@ from bauhaus.utils import likelihood
 T = Encoding()
 
 
-# Class for Budget propositions
+# Class for Time propositions
 @proposition(T)
 class time_prop:
     # instantiate with name to be given to the proposition
@@ -127,9 +127,12 @@ def time_theory(user_departure_time, user_arrival_time):
     rush_hour_percent = trip_data[2]
     slow_during_rh_percent = trip_data[3]
 
-    # Valid if the trips first bas time is after user's start time
-    if given_st > user_st_time and given_ed < user_ed_time:
+    # Valid if the trips first bus departure time is after user's desired departure time
+    if given_st > user_st_time:
         T.add_constraint(valid_start_time)
+
+    # Valid if the trips last bus arrival time is before user's desired end time
+    if given_ed < user_ed_time:
         T.add_constraint(valid_end_time)
 
     # If 60% of the trip is within rush hour periods
@@ -139,6 +142,11 @@ def time_theory(user_departure_time, user_arrival_time):
     # If 50% of the transit types are slow during rush hours
     if slow_during_rh_percent >= 50:
         T.add_constraint(more_than_fifty_strtcar_bus)
+
+    # Rush hour implies there can't be more than 50% slow transit types within the trip
+    T.add_constraint(~rush_hour | ~more_than_fifty_strtcar_bus)
+    T.add_constraint(
+        ~((valid_start_time & valid_end_time) & rush_hour & ~more_than_fifty_strtcar_bus) | within_time_cons)
 
 
 sample_trip = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
