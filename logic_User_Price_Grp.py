@@ -2,10 +2,15 @@ from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import likelihood
 
 # Encoding that will store all of your constraints
+# User Price Group Logic Encoding: E
 E = Encoding()
+# Budget Constraint Logic Encoding: B
+B = Encoding()
+# Time Constraint Logic Encoding: T
+T = Encoding()
 
 
-# Class for Budget propositions
+# Class for Price Group propositions
 @proposition(E)
 class budget_prop:
     # instantiate with name to be given to the proposition
@@ -16,7 +21,29 @@ class budget_prop:
         return f"E.{self.data}"
 
 
-# Budget
+# Class for Budget propositions
+@proposition(B)
+class budget_cons_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return f"E.{self.data}"
+
+
+# Class for Time propositions
+@proposition(T)
+class time_cons_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return f"E.{self.data}"
+
+
+# Budget (1st layer)
 kid = budget_prop('kid')
 adult = budget_prop('adult')
 youth = budget_prop('youth')
@@ -35,7 +62,13 @@ surpass_normal_price = budget_prop('cheaper to go with day pass')
 within_budget = budget_prop('trip plan is within budget')
 
 
-def example_theory(hasPresto, age):
+# Budget Constraint (2nd layer)
+
+
+# Time Constraint
+
+
+def price_grp_theory(hasPresto, age):
     # Determining and adding the user to an age group
     if age <= 12:
         E.add_constraint(kid)
@@ -99,33 +132,39 @@ def price_grp_define(logic_dict):
 
 
 def main(test_Presto, test_age):
+    print("--- Price Group Logic ---")
     print("\nConditions:")
     print(str(test_Presto) + ", " + str(test_age))
 
-    T = example_theory(test_Presto, test_age)
+    logic_price_grp = price_grp_theory(test_Presto, test_age)
     # Don't compile until you're finished adding all your constraints!
-    T = T.compile()
+    logic_price_grp = logic_price_grp.compile()
     # After compilation (and only after), you can check some properties
     # of your model:
-    print("\nSatisfiable: %s" % T.satisfiable())
-    # print("# Solutions: %d" % count_solutions(T))
-    print("   Number of Solutions: %s" % T.model_count())
+    print("\nSatisfiable: %s" % logic_price_grp.satisfiable())
+    # print("# Solutions: %d" % count_solutions(logic_price_grp))
+    print("Number of Solutions: %s" % logic_price_grp.model_count())
 
-    budget_solution = T.solve()
+    budget_solution = logic_price_grp.solve()
 
-    print("   Solution: %s" % budget_solution)
+    print("Solution: %s" % budget_solution)
     # find the specific price group
+    print("\nPrice Group + Price")
     print(price_grp_define(budget_solution))
 
-    print("\nVariable likelihoods:")
-    for v, vn in zip(
-            [kid, adult, youth, senior, presto, normal_adult, normal_other, presto_adult, presto_other, presto_day_pass,
-             surpass_normal_price, within_budget],
-            'kayspodpodsw'):
-        # Ensure that you only send these functions NNF formulas
-        # Literals are compiled to NNF here
-        print(" %s: %.2f" % (vn, likelihood(T, v)))
-    print()
+    # print("\nVariable likelihoods:")
+    # for v, vn in zip(
+    #         [kid, adult, youth, senior, presto, normal_adult, normal_other, presto_adult, presto_other, presto_day_pass,
+    #          surpass_normal_price, within_budget],
+    #         'kayspodpodsw'):
+    #     # Ensure that you only send these functions NNF formulas
+    #     # Literals are compiled to NNF here
+    #     print(" %s: %.2f" % (vn, likelihood(logic_price_grp, v)))
+    print("\n------------------------------------------\n")
+
+    print("---Time Constraints Logic---")
+    print("\nConditions:")
+    print(str(test_Presto) + ", " + str(test_age))
 
 # main(True, 24)
 # main(False, 24)
