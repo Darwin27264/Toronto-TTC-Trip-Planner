@@ -74,15 +74,34 @@ def find_closest_stop(location):
 
 
 def print_address(address):
-    # printing address
+    """
+    print_address prints the address of the location
+    found from the geocoder library
+    """
     print("\nLocation Address: " + address.address)
-
-    # printing latitude and longitude
     print("\nLatitude: ", address.latitude, "")
     print("Longitude: ", address.longitude)
 
 
 def get_location_1():
+    """
+    get_location_1 is the first option for the user to find a specific location.
+    The function asks for a general location name and will find 2 locations. 
+    The first location is just exactly what the user inputs into the function, 
+    the second location is the user input with "Toronto" concatenated to the end.
+    If the none of the locations are found, the function prints "Location is not found",
+    if none of the locations are withing the boundaries of Toronto, the function
+    prints "Location is not in Toronto". If only one of the locations is defined in
+    Toronto, the function defaults to that location. If both locations are defined
+    in Toronto, the user is asked to pick one of the two locations.
+    
+    Once a location has been decided on, the function finds the bus stop closest to the
+    location that was chosen and asks the user if it is the station that they are at.
+    If yes, the stop_id is returned, if not, the function lists out all of the stops
+    within 200 meters of the original stop and asks the user if they are at any of the
+    listed stops. If yes, the selected stop_id is returned, if not, the user is redirected
+    back to the 3 options
+    """
     # Geopy preloading
     loc = Nominatim(user_agent="GetLoc")
     # Max and min coordinates defining Toronto Boundaries
@@ -169,6 +188,13 @@ def get_location_1():
 
 
 def get_location_2():
+    """
+    get_location_2 is the second option for the user to find a specific location.
+    The user is asked to enter the exact name from the TTC website and then function
+    converts all of the characters to uppercase and checks the data base for a matching name.
+    If nothing is found, the user is redirected to the three options, if the stop is found,
+    the stop_id is returned.
+    """
     specific_stop = input("Enter the specific stop name (ones found in the TTC website): ")
 
     s.execute("SELECT * FROM stops WHERE stop_name=:stop_name", {'stop_name': specific_stop.upper()})
@@ -199,6 +225,13 @@ def is_number(string):
 
 
 def get_location_3():
+    """
+    get_location_3 is the third option for the user to find a specific location.
+    The function asks the user to input a set of coordinates (lat,lon) and
+    checks if the coordinates are within the boundaries of Toronto. If yes, the
+    function finds the bus stop that is closest to the coordinates and returns 
+    the stop_id, if not, the user is redirected back to the three options.
+    """
     # Max and min coordinates defining Toronto Boundaries
     max_lat = 43.909707
     max_lon = -79.123111
@@ -230,6 +263,14 @@ def get_location_3():
 
 
 def get_location(str):
+    """
+    get_location displays the three options the user has to pick a specific location.
+    This function will call the corredsponding functions based on what the user
+    selects. Refer to the documentation above for the explanation for each method.
+    
+    str: a string to make this function more dynamic and output a different instruction
+    based on the input
+    """
     input_valid = False
     while not input_valid:
         print(str)
@@ -260,6 +301,21 @@ def get_location(str):
 
 
 def call_get_location(msg1, msg2, msg3):
+    """
+    call_get_location does the error checking for the get_location function.
+    If False is returned from any of the methods, the three methods are presented
+    to user to try again. The function also asks the user if the stop chosen by
+    the code is the corret one. If not then the function lists all of the stops
+    within 200 meters of the original stop and asks the user to pick the one they are
+    at. If they choose one, the stop_id of the chosen stop is given, if they do not, then
+    they are redirected to the three methods again.
+    
+    If a stop id is finally chosen, the information about the stop is returned to
+    the calling function
+    
+    msg1 msg2 msg3: are dynamic variables used to customise the function call to the
+    purpose it is used for.
+    """
     correct_stop = False
     while correct_stop == False:
         origin_coords = get_location(msg1)
@@ -319,6 +375,12 @@ def call_get_location(msg1, msg2, msg3):
 
 
 def validate_time(msg):
+    """
+    validate_time takes a string in the form (HH:MM) or HH:MM 
+    with any whitespace and converts the hours and minutes into integer form
+    
+    The hours and minutes are returned in a tuple in the format (hours, minutes)
+    """
     validTime = False
     while validTime == False:
         time = input(msg)
@@ -346,6 +408,14 @@ def validate_time(msg):
 
 
 def get_start_time(str):
+    """
+    get_start_time gets the starting trip time from the user. 
+    The user is given two options: either use the current time of their machine
+    or enter a specific time. When using the second option, the input is error
+    checked using the validate_time function. 
+    
+    get_start_time returns a tuple of the format (hours,minutes)
+    """
     print(str)
     validInput = False
     while validInput == False:
@@ -367,6 +437,14 @@ def get_start_time(str):
 
 
 def get_end_time(starting_time, msg, msg1):
+    """
+    get_end_time gets the time at which the user wishes
+    to arrive at their destination. The input is error checked using
+    the function validate_time and also error checked to make sure
+    that it is after the starting time.
+    
+    get_end_time returns a tuple of the format (hours, minutes)
+    """
     valid_Time = False
     while valid_Time == False:
         ending_time = validate_time(msg1)
@@ -379,6 +457,11 @@ def get_end_time(starting_time, msg, msg1):
 
 
 def check_time(starting, ending):
+    """
+    check_time checks if the first time comes before the second
+    time. If yes, the function returns True, else, the function returns
+    False
+    """
     print(starting)
     print(ending)
     if starting[0] > ending[0]:
@@ -390,6 +473,13 @@ def check_time(starting, ending):
 
 
 def get_age():
+    """
+    get_age gets the user to input their age for the price calculation.
+    the input is error checked the make sure that it is a numberical value
+    and also an intger.
+    
+    get_age returns an integer
+    """
     valid_Age = False
     while valid_Age == False:
         age = input("Enter your age (for trip price calculation): ")
@@ -405,6 +495,12 @@ def get_age():
 
 
 def get_presto():
+    """
+    get_presto gets the user to input whether or not they own
+    a presto card. This is also used in the price calculation.
+    
+    get_presto returns True or False
+    """
     valid_Presto = False
     while valid_Presto == False:
         presto = input("Do you have a presto card? (Y/N): ")
@@ -420,6 +516,14 @@ def get_presto():
 
 
 def get_budget():
+    """
+    get_budget gets the user to input how much they want to
+    spend on their TTC trip. The function accepts any amount of
+    whitespace and dollar signs. The input is also error checked
+    to make sure it is a numerical value and more than 0.
+    
+    get_budget returns a float
+    """
     valid_Budget = False
     while valid_Budget == False:
         budget = input("Enter your spending budget: ")
@@ -616,15 +720,19 @@ def get_input():
     os.system(clearTermial)
     budget = get_budget()
 
-    os.system(clearTermial)
-    additional_stops_list = get_additional_stops(starting_time, ending_time)
+    # not enough time to implement this feature
+    # os.system(clearTermial)
+    # additional_stops_list = get_additional_stops(starting_time, ending_time)
 
     user_input = Input((start, (starting_time, starting_time)), (destination, (ending_time, ending_time)), int(
-        age), hasPresto, budget, additional_stops_list)
+        age), hasPresto, budget, [])
     return user_input
 
 
 def print_info(info):
+    """
+    print_info just prints information for debugging purposes
+    """
     os.system(clearTermial)
     print("Starting stop_id: " + str(info.starting_stop.stop_id))
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': info.starting_stop.stop_id})
