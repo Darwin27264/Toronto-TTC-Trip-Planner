@@ -790,8 +790,3 @@ def print_info(info):
         print("Additional stop arrive time: " + str(i.arrive_time))
         print("Additional stop leave time: " + str(i.leave_time))
         print("\n")
-
-# Clear terminal
-# os.system(clearTermial)
-# info = get_input()
-# print_info(info)
