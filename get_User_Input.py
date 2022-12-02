@@ -539,6 +539,29 @@ def get_budget():
     return budget
 
 
+def get_pref_transit():
+    """
+    get_pref_transit gets the user's prefferred transit method and returns 
+    the corredsponding route_type
+    """
+    valid_input = False
+    while valid_input == False:
+        print("What is your preferred transit method?\n1) Bus\n2) Subway\n3) Streetcar\n4) Walking\n")
+        pref_transit = input("Enter one of the options: ")
+        inputs = ['1','2','3','4']
+        if pref_transit not in inputs:
+            os.system(clearTermial)
+            print("Please enter one of the options\n")
+        else: valid_input = True
+    if pref_transit == '1':
+        return 3
+    elif pref_transit == '2':
+        return 1
+    elif pref_transit == '3':
+        return 0
+    elif pref_transit == '4':
+        return -1
+
 def get_additional_stops(start_time, end_time):
     """
     Records any extra stops the user wishes to take between
@@ -723,9 +746,12 @@ def get_input():
     # not enough time to implement this feature
     # os.system(clearTermial)
     # additional_stops_list = get_additional_stops(starting_time, ending_time)
+    
+    os.system(clearTermial)
+    pref_transit = get_pref_transit()
 
     user_input = Input((start, (starting_time, starting_time)), (destination, (ending_time, ending_time)), int(
-        age), hasPresto, budget, [])
+        age), hasPresto, budget, [], pref_transit)
     return user_input
 
 
@@ -753,6 +779,8 @@ def print_info(info):
     print("Has Presto: " + str(info.hasPresto))
     print("\n")
     print("Budget: " + str(info.budget))
+    print("\n")
+    print("Preferred Transit: " + str(info.pref_transit))
     print("\n")
     for i in info.additional_stops_list:
         print("Additional stop stop_id: " + str(i.stop_id))
