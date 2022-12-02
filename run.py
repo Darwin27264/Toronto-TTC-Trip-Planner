@@ -57,8 +57,8 @@ normal_other = budget_prop('normal user (others)')
 
 presto_adult = budget_prop('presto user (adult)')
 presto_other = budget_prop('presto users (not adults)')
-
 presto_day_pass = budget_prop('buy presto day pass')
+
 surpass_normal_price = budget_prop('cheaper to go with day pass')
 within_budget = budget_prop('trip plan is within budget')
 # Time
