@@ -1,11 +1,13 @@
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import likelihood
 
+import math
+
 # Encoding that will store all of your constraints
 T = Encoding()
 
 
-# Class for Time propositions
+# Class for Budget propositions
 @proposition(T)
 class time_prop:
     # instantiate with name to be given to the proposition
@@ -16,13 +18,31 @@ class time_prop:
         return f"T.{self.data}"
 
 
+# Class for Budget propositions
+@proposition(T)
+class solution_prop:
+    # instantiate with name to be given to the proposition
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return f"T.{self.data}"
+
+
 # Time
-rush_hour = time_prop('rush hour (>70% of trip within rush hours detected)')
+rush_hour = time_prop('rush hour (>60% of trip within rush hours detected)')
 valid_start_time = time_prop('valid start time (bus)')
 valid_end_time = time_prop('valid end time (bus)')
 more_than_fifty_strtcar_bus = time_prop('more than 50% busses or street cars within trip')
 
-within_time_cons = time_prop('within time constraint')
+within_time_cons = solution_prop('within time constraint')
+within_budget_cons = solution_prop('within budget constraint')
+
+solution = solution_prop('valid solution')
+
+
+# for making each trip into a proposition, use code below
+# solution = solution_prop('valid solution' + i)
 
 
 def time_to_int(time_str):
@@ -113,49 +133,128 @@ def rh_factor_calc(single_trip):
     return (trip_start_time, trip_end_time, int(total_slow_transit_type), int(total_rh_percentage))
 
 
-def time_theory(user_departure_time, user_arrival_time):
+def time_theory(user_departure_time, user_arrival_time, trip, price_per_2h, user_budget):
     # Compare the user defined time with the algorithm given time
     # should already be in int time format
     user_st_time = user_departure_time
     user_ed_time = user_arrival_time
 
-    trip_data = rh_factor_calc(sample_trip)
+    day_pass_price = 13.5
+
+    trip_data = rh_factor_calc(trip)
+
     # Trip start and end times
     given_st = trip_data[0]
     given_ed = trip_data[1]
     # Trip transit type and rush hour related data
-    rush_hour_percent = trip_data[2]
-    slow_during_rh_percent = trip_data[3]
+    rush_hour_percent = trip_data[3]
+    slow_during_rh_percent = trip_data[2]
 
+    T.add_constraint(within_time_cons)
     # Valid if the trips first bus departure time is after user's desired departure time
     if given_st > user_st_time:
         T.add_constraint(valid_start_time)
+    else:
+        T.add_constraint(~valid_start_time)
 
     # Valid if the trips last bus arrival time is before user's desired end time
     if given_ed < user_ed_time:
         T.add_constraint(valid_end_time)
+    else:
+        T.add_constraint(~valid_end_time)
 
     # If 60% of the trip is within rush hour periods
     if rush_hour_percent >= 60:
         T.add_constraint(rush_hour)
+    else:
+        T.add_constraint(~rush_hour)
 
     # If 50% of the transit types are slow during rush hours
     if slow_during_rh_percent >= 50:
         T.add_constraint(more_than_fifty_strtcar_bus)
 
     # Rush hour implies there can't be more than 50% slow transit types within the trip
-    T.add_constraint(~rush_hour | ~more_than_fifty_strtcar_bus)
-    T.add_constraint(
-        ~((valid_start_time & valid_end_time) & rush_hour & ~more_than_fifty_strtcar_bus) | within_time_cons)
+    T.add_constraint(~(~valid_start_time | ~valid_end_time) | ~within_time_cons)
+    T.add_constraint(~(rush_hour & more_than_fifty_strtcar_bus) | ~within_time_cons)
+
+    # Budget Constraints (Layer 2)
+    total_price = math.ceil(((user_ed_time - user_st_time) / 2) * price_per_2h)
+    correct_price = 0
+
+    if total_price > day_pass_price:
+        correct_price = day_pass_price
+    else:
+        correct_price = total_price
+
+    if correct_price > user_budget:
+        T.add_constraint(~within_budget_cons)
+    else:
+        T.add_constraint(within_budget_cons)
+
+    T.add_constraint(~(within_time_cons & within_budget_cons) | ~solution)
+
+    print("\n---\n")
+    print("Start Time, End Time, Slow Transit Type, Rush Hour Percent")
+    print(trip_data)
+    print("User total price: " + str(correct_price))
+    print("User budget: " + str(user_budget))
+    print("\n---")
+
+    return T
 
 
-sample_trip = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, 0), [('11:51:08', '12:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, 0), [('13:51:08', '14:40:10')]),
-               ((4049, 574, 'close_to_close', 61367, 3), [('13:51:08', '14:40:10')])]
+# >50% slow transit type & >60% rush hour, expect no solution
+sample_trip_1 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('8:51:08', '9:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('17:51:08', '18:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('16:51:08', '18:40:10')])]
+# >50% slow transit type & <60% rush hour, expect solution
+sample_trip_2 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')])]
+# <50% slow transit type & >60% rush hour, expect solution
+sample_trip_3 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('16:51:08', '17:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('17:51:08', '18:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('18:51:08', '17:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('16:51:08', '14:40:10')])]
+# <50% slow transit type & <60% rush hour, expect solution
+sample_trip_4 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')])]
 
-print(rh_factor_calc(sample_trip))
+
+def main():
+    print("--- Time Logic ---")
+    print("\nConditions:")
+
+    logic_time = time_theory(700, 1450, sample_trip_4, 3.2, 10)
+    # Don't compile until you're finished adding all your constraints!
+    logic_time = logic_time.compile()
+    # After compilation (and only after), you can check some properties
+    # of your model:
+    print("\nSatisfiable: %s" % logic_time.satisfiable())
+    # print("# Solutions: %d" % count_solutions(logic_price_grp))
+    print("Number of Solutions: %s" % logic_time.model_count())
+    # print specific solutions
+    print("Solution: %s" % logic_time.solve())
+
+
+main()
