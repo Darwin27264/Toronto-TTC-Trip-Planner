@@ -546,9 +546,9 @@ def get_pref_transit():
     """
     valid_input = False
     while valid_input == False:
-        print("What is your preferred transit method?\n1) Bus\n2) Subway\n3) Streetcar\n4) Walking\n")
+        print("What is your preferred transit method?\n1) Bus\n2) Subway\n3) Streetcar\n4) Walking\n5) No Preference\n")
         pref_transit = input("Enter one of the options: ")
-        inputs = ['1','2','3','4']
+        inputs = ['1','2','3','4','5']
         if pref_transit not in inputs:
             os.system(clearTermial)
             print("Please enter one of the options\n")
@@ -561,6 +561,8 @@ def get_pref_transit():
         return 0
     elif pref_transit == '4':
         return -1
+    elif pref_transit == '5':
+        return 5
 
 def get_additional_stops(start_time, end_time):
     """
