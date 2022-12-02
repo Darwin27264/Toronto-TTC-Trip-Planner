@@ -509,21 +509,42 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
     # Finds all permutations in the subway
     print("\nFinding permutation going to and within the subway...")
 
-    j = 0
+    i = 0
     unique_combinations = []
     in_sub_final = []
 
-    while j < len(sub):
-        for r in itertools.product(to_sub_final, sub[j]):
-            unique_combinations.append(r)
+    # while j < len(sub):
+    #     for r in itertools.product(to_sub_final, sub[j]):
+    #         unique_combinations.append(r)
+    #
+    #     to_sub_final = unique_combinations
+    #     unique_combinations = []
+    #
+    #     # print("total count: " + str(len(to_sub_all)))
+    #     # print("\n")
+    #
+    #     j += 1
 
-        to_sub_final = unique_combinations
-        unique_combinations = []
+    while i < len(sub):
 
-        # print("total count: " + str(len(to_sub_all)))
-        # print("\n")
+        if type((sub[i][0])) == tuple:
 
-        j += 1
+            exp_temp = [(sub[i][0])]
+
+            for r in itertools.product(to_sub_final, exp_temp):
+                unique_combinations.append(r)
+
+            to_sub_final = unique_combinations
+            unique_combinations = []
+
+        else:
+            for r in itertools.product(to_sub_final, sub[i][0]):
+                unique_combinations.append(r)
+
+            to_sub_final = unique_combinations
+            unique_combinations = []
+
+        i += 1
 
     for every_sub in to_sub_final:
         in_sub_final.append(flatten_tuple_in_sub(every_sub))
@@ -574,15 +595,20 @@ all_routes = []
 # User input test
 # info = get_input()
 # test case
-# info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
+info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((14238, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
-info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
+# info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((465, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 print_info(info)
 direct_routes = [find_direct_route(info.starting_stop.stop_id, info.ending_stop.stop_id, True)]
 if direct_routes[0] != [[]]:
+
     for i in direct_routes:
         print(i)
+        if type(i[0]) == list:
+            print(len(i[0]))
+        else:
+            print(1)
 
         if type(i[0]) == list:
             for j in i[0]:
@@ -591,7 +617,6 @@ if direct_routes[0] != [[]]:
             all_routes.append([i[0]])
 
     print("--------------------------------")
-
 else:
     print("No Direct Routes Found ...\n\nLooking for subway path ...\n")
     start_subway = find_closest_subway(info.starting_stop.stop_id)
@@ -646,13 +671,24 @@ else:
     print("--------------------------------")
     for i in to_start_subway:
         print(i)
+        if type(i[0]) == list:
+            print(len(i[0]))
+        else:
+            print(1)
     print("--------------------------------")
     for i in subway:
         print(i)
+        if type(i[0]) == list:
+            print(len(i[0]))
+        else:
+            print(1)
     print("--------------------------------")
     for i in from_end_subway:
         print(i)
-
+        if type(i[0]) == list:
+            print(len(i[0]))
+        else:
+            print(1)
     print("--------------------------------\n")
 
     if type(to_start_subway[0]) == tuple:
