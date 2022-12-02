@@ -19,19 +19,21 @@ data_subway = sqlite3.connect('subway.db')
 m = data_subway.cursor()
 
 
-def dict_to_binary(the_dict):
-    str = json.dumps(the_dict)
-    binary = ' '.join(format(ord(letter), 'b') for letter in str)
-    return binary
-
-
 def binary_to_dict(the_binary):
+    """
+    binary_to_dict converts binary numbers into a python dictionary and then returns
+    the dictionary
+    """
     jsn = ''.join(chr(int(x, 2)) for x in the_binary.split())
     d = json.loads(jsn)
     return d
 
 
 def stop_distance(stop1, stop2):
+    """
+    stop_distance returns the distance between two
+    stops in units of kilometers
+    """
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop1})
     stop1 = s.fetchone()
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop2})
@@ -196,6 +198,10 @@ def find_direct_route(start, end, val):
 
 
 def make_stops_dict(stop):
+    """
+    make_stops_dict makes a dictionary of all of the stops that bus
+    stations withing 200 meters of the original station go to
+    """
     stops_list = nearby_stops(stop)
     all_stops = {}
     for k in stops_list:
@@ -210,6 +216,11 @@ def make_stops_dict(stop):
 
 
 def find_closest_stop(start, end, used_stops):
+    """
+    find_clostest_stop finds the closest stop to the end stop
+    without returning any stops inside the "used_stops" list and the stop
+    has more than 4 routes goes through it
+    """
     dict_stops = make_stops_dict(start)
     if int(list(dict_stops)[0]) != start and int(list(dict_stops)[0]) not in used_stops:
         closest = int(list(dict_stops)[0])
@@ -228,6 +239,11 @@ def find_closest_stop(start, end, used_stops):
 
 
 def find_closest_subway(stop):
+    """
+    find_closest_subway will take the parameter "stop" and
+    search the subways database for the subway stop closest
+    to the current stop and return the stop_id
+    """
     s.execute("SELECT * FROM stops WHERE stop_id=:stop_id", {'stop_id': stop})
     stop_info = s.fetchone()
     m.execute("SELECT * FROM subways")
@@ -240,6 +256,11 @@ def find_closest_subway(stop):
 
 
 def navigate_subway(start, end):
+    """
+    navigate_subway will find a path through the subway lines
+    and return a list of all steps of each possible way the user
+    can do each step
+    """
     m.execute("SELECT * FROM subways WHERE stop_id=:stop_id", {'stop_id': start})
     start_plat = m.fetchone()
     m.execute("SELECT * FROM subways WHERE stop_name LIKE :stop_name",
