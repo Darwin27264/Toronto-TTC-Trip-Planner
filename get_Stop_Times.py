@@ -129,7 +129,7 @@ def clean_time(trip):
     for i in correctlist:
         permuation = []
         for j in range(len(output)):
-            permuation.append((output[j][0], i[j]))
+            permuation.append((output[j][0], [i[j]]))
         returnlist.append(permuation)
     return returnlist
 
