@@ -1,6 +1,9 @@
 from bauhaus import Encoding, proposition, constraint
 from bauhaus.utils import likelihood
 
+from datetime import datetime
+from time import strptime
+
 import math
 
 # Encoding that will store all of your constraints
@@ -33,7 +36,7 @@ class solution_prop:
 rush_hour = time_prop('rush hour (>60% of trip within rush hours detected)')
 valid_start_time = time_prop('valid start time (bus)')
 valid_end_time = time_prop('valid end time (bus)')
-more_than_fifty_strtcar_bus = time_prop('more than 50% busses or street cars within trip')
+more_than_fifty_strtcar_bus = time_prop('>50% busses or street cars within trip')
 
 within_time_cons = solution_prop('within time constraint')
 within_budget_cons = solution_prop('within budget constraint')
@@ -151,6 +154,7 @@ def time_theory(user_departure_time, user_arrival_time, trip, price_per_2h, user
     slow_during_rh_percent = trip_data[2]
 
     T.add_constraint(within_time_cons)
+    T.add_constraint(solution)
     # Valid if the trips first bus departure time is after user's desired departure time
     if given_st > user_st_time:
         T.add_constraint(valid_start_time)
@@ -178,7 +182,23 @@ def time_theory(user_departure_time, user_arrival_time, trip, price_per_2h, user
     T.add_constraint(~(rush_hour & more_than_fifty_strtcar_bus) | ~within_time_cons)
 
     # Budget Constraints (Layer 2)
-    total_price = math.ceil(((user_ed_time - user_st_time) / 2) * price_per_2h)
+    if user_st_time < 1000:
+        user_st = "0" + str(user_st_time)[0] + ":" + str(user_st_time)[1] + str(user_st_time)[2]
+    else:
+        user_st = str(user_st_time)[0] + str(user_st_time)[1] + ":" + str(user_st_time)[2] + str(user_st_time)[3]
+
+    if user_ed_time < 1000:
+        user_ed = "0" + str(user_ed_time)[0] + ":" + str(user_ed_time)[1] + str(user_ed_time)[2]
+    else:
+        user_ed = str(user_ed_time)[0] + str(user_ed_time)[1] + ":" + str(user_ed_time)[2] + str(user_ed_time)[3]
+
+    st_time = datetime.strptime(user_ed, '%H:%M')
+    ed_time = datetime.strptime(user_st, '%H:%M')
+
+    total_trip_time = abs((ed_time - st_time).total_seconds()) / 3600
+
+    total_price = math.ceil(((total_trip_time) / 2) * price_per_2h)
+
     correct_price = 0
 
     if total_price > day_pass_price:
@@ -191,7 +211,9 @@ def time_theory(user_departure_time, user_arrival_time, trip, price_per_2h, user
     else:
         T.add_constraint(within_budget_cons)
 
-    T.add_constraint(~(within_time_cons & within_budget_cons) | ~solution)
+    # Solution is only value if both time constraint and budget constraints are met
+    T.add_constraint(~(within_time_cons & within_budget_cons) | solution)
+    T.add_constraint(~(~within_time_cons | ~within_budget_cons) | ~solution)
 
     print("\n---\n")
     print("Start Time, End Time, Slow Transit Type, Rush Hour Percent")
@@ -245,7 +267,7 @@ def main():
     print("--- Time Logic ---")
     print("\nConditions:")
 
-    logic_time = time_theory(700, 1450, sample_trip_4, 3.2, 10)
+    logic_time = time_theory(1300, 1450, sample_trip_1, 2.5, 10)
     # Don't compile until you're finished adding all your constraints!
     logic_time = logic_time.compile()
     # After compilation (and only after), you can check some properties
