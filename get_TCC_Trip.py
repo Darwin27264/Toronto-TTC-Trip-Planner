@@ -641,6 +641,8 @@ def get_trips(info):
             else:
                 all_routes.append([i[0]])
 
+        return direct_routes
+
         print("--------------------------------")
     else:
         print("No Direct Routes Found ...\n\nLooking for subway path ...\n")

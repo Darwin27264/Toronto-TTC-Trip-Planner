@@ -24,6 +24,9 @@ def start_program():
     print(all_trips)
     trips_with_time = get_all_times(all_trips)
 
+    print(trips_with_time)
+
     return (trips_with_time, pref_transit, user_age, hasPresto, user_budget)
+
 
 start_program()
