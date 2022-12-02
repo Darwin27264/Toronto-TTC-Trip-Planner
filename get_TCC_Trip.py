@@ -534,6 +534,7 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
     unique_combinations = []
     in_sub_final = []
 
+    # Old format subway permutation code
     # while j < len(sub):
     #     for r in itertools.product(to_sub_final, sub[j]):
     #         unique_combinations.append(r)
@@ -611,114 +612,113 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
 
 os.system(clearTermial)
 
-# final output
-all_routes = []
-# User input test
-# info = get_input()
-# test case
-# info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
-# info = Input((14238, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
-# info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
-info = Input((465, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
-print_info(info)
-direct_routes = [find_direct_route(info.starting_stop.stop_id, info.ending_stop.stop_id, True)]
-if direct_routes[0] != [[]]:
 
-    for i in direct_routes:
-        print(i)
-        if type(i[0]) == list:
-            print(len(i[0]))
-        else:
-            print(1)
+def get_trips(info):
+    # final output
+    all_routes = []
+    # User input test
+    # info = get_input()
+    # test case
+    # info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[],5)
+    # info = Input((14238, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[],5)
+    # info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[],5)
+    # info = Input((465, ((12, 0), (12, 0))), (3169, ((20, 0), (20, 0))), 19, True, 20, [], 5)
+    print_info(info)
 
-        if type(i[0]) == list:
-            for j in i[0]:
-                all_routes.append([j])
-        else:
-            all_routes.append([i[0]])
+    direct_routes = [find_direct_route(info.starting_stop.stop_id, info.ending_stop.stop_id, True)]
+    if direct_routes[0] != [[]]:
 
-    print("--------------------------------")
-else:
-    print("No Direct Routes Found ...\n\nLooking for subway path ...\n")
-    start_subway = find_closest_subway(info.starting_stop.stop_id)
-    end_subway = find_closest_subway(info.ending_stop.stop_id)
-    subway = navigate_subway(start_subway, end_subway)
-    to_start_subway = []
-    to_start_subway.append(find_direct_route(info.starting_stop.stop_id, start_subway, True))
-    if to_start_subway[0] == [[]]:
-        print("No direct route from start to subway stop...\n\nLooking for alternatives...\n")
-        route_from_start = []
-        to_start_subway = []
-        closest_to_start = find_closest_stop(info.starting_stop.stop_id, start_subway, [])
-        prev_closest = closest_to_start[0]
-        closest_to_subway = find_direct_route(info.starting_stop.stop_id, closest_to_start[0], True)
-        route_from_start.append([closest_to_subway[0]])
-        found_route = False
-        while found_route == False:
-            direct = find_direct_route(closest_to_start[0], start_subway, True)
-            if direct[0] != []:
-                found_route = True
-                route_from_start.append(direct)
+        for i in direct_routes:
+            print(i)
+            if type(i[0]) == list:
+                print(len(i[0]))
             else:
-                closest_to_start = find_closest_stop(closest_to_start[0], start_subway, closest_to_start[1])
-                route_from_start.append(find_direct_route(prev_closest, closest_to_start[0], True))
-                prev_closest = closest_to_start[0]
-        to_start_subway = route_from_start
-   
-    from_end_subway = []
-    from_end_subway.append(find_direct_route(end_subway, info.ending_stop.stop_id, True))
-    if from_end_subway[0] == [[]]:
-        print("No direct route from subway to ending stop...\n\nLooking for alternatives...\n")
-        route_to_end = []
-        from_end_subway = []
-        closest_to_end = find_closest_stop(end_subway, info.ending_stop.stop_id, [])
-        prev_closest = closest_to_end[0]
-        near = nearby_stops(end_subway)
-        subway_to_closest = close_to_end(closest_to_end[0], near)
-        route_to_end.append([subway_to_closest[0]])
-        found_route = False
-        while found_route == False:
-            direct = find_direct_route(closest_to_end[0], info.ending_stop.stop_id, True)
-            if direct[0] != []:
-                found_route = True
-                route_to_end.append(direct)
+                print(1)
+
+            if type(i[0]) == list:
+                for j in i[0]:
+                    all_routes.append([j])
             else:
-                closest_to_end = find_closest_stop(closest_to_end[0], info.ending_stop.stop_id, closest_to_end[1])
-                route_to_end.append(find_direct_route(prev_closest, closest_to_end[0], True))
-                prev_closest = closest_to_end[0]
-        from_end_subway = route_to_end
-    route = []
+                all_routes.append([i[0]])
 
-    print("--------------------------------")
-    for i in to_start_subway:
-        print(i)
-        if type(i[0]) == list:
-            print(len(i[0]))
-        else:
-            print(1)
-    print("--------------------------------")
-    for i in subway:
-        print(i)
-        if type(i[0]) == list:
-            print(len(i[0]))
-        else:
-            print(1)
-    print("--------------------------------")
-    for i in from_end_subway:
-        print(i)
-        if type(i[0]) == list:
-            print(len(i[0]))
-        else:
-            print(1)
-    print("--------------------------------\n")
-
-    if type(to_start_subway[0]) == tuple:
-        all_routes = all_routes_finder([to_start_subway], subway, from_end_subway)
+        print("--------------------------------")
     else:
-        all_routes = all_routes_finder(to_start_subway, subway, from_end_subway)
+        print("No Direct Routes Found ...\n\nLooking for subway path ...\n")
+        start_subway = find_closest_subway(info.starting_stop.stop_id)
+        end_subway = find_closest_subway(info.ending_stop.stop_id)
+        subway = navigate_subway(start_subway, end_subway)
+        to_start_subway = []
+        to_start_subway.append(find_direct_route(info.starting_stop.stop_id, start_subway, True))
+        if to_start_subway[0] == [[]]:
+            print("No direct route from start to subway stop...\n\nLooking for alternatives...\n")
+            route_from_start = []
+            to_start_subway = []
+            closest_to_start = find_closest_stop(info.starting_stop.stop_id, start_subway, [])
+            prev_closest = closest_to_start[0]
+            closest_to_subway = find_direct_route(info.starting_stop.stop_id, closest_to_start[0], True)
+            route_from_start.append([closest_to_subway[0]])
+            found_route = False
+            while found_route == False:
+                direct = find_direct_route(closest_to_start[0], start_subway, True)
+                if direct[0] != []:
+                    found_route = True
+                    route_from_start.append(direct)
+                else:
+                    closest_to_start = find_closest_stop(closest_to_start[0], start_subway, closest_to_start[1])
+                    route_from_start.append(find_direct_route(prev_closest, closest_to_start[0], True))
+                    prev_closest = closest_to_start[0]
+            to_start_subway = route_from_start
 
-# for i in all_routes:
-#     print(i)
-print(len(all_routes))
-print(all_routes[10000])
-print("--------------------------------")
+        from_end_subway = []
+        from_end_subway.append(find_direct_route(end_subway, info.ending_stop.stop_id, True))
+        if from_end_subway[0] == [[]]:
+            print("No direct route from subway to ending stop...\n\nLooking for alternatives...\n")
+            route_to_end = []
+            from_end_subway = []
+            closest_to_end = find_closest_stop(end_subway, info.ending_stop.stop_id, [])
+            prev_closest = closest_to_end[0]
+            near = nearby_stops(end_subway)
+            subway_to_closest = close_to_end(closest_to_end[0], near)
+            route_to_end.append([subway_to_closest[0]])
+            found_route = False
+            while found_route == False:
+                direct = find_direct_route(closest_to_end[0], info.ending_stop.stop_id, True)
+                if direct[0] != []:
+                    found_route = True
+                    route_to_end.append(direct)
+                else:
+                    closest_to_end = find_closest_stop(closest_to_end[0], info.ending_stop.stop_id, closest_to_end[1])
+                    route_to_end.append(find_direct_route(prev_closest, closest_to_end[0], True))
+                    prev_closest = closest_to_end[0]
+            from_end_subway = route_to_end
+        route = []
+
+        print("--------------------------------")
+        for i in to_start_subway:
+            print(i)
+            if type(i[0]) == list:
+                print(len(i[0]))
+            else:
+                print(1)
+        print("--------------------------------")
+        for i in subway:
+            print(i)
+            if type(i[0]) == list:
+                print(len(i[0]))
+            else:
+                print(1)
+        print("--------------------------------")
+        for i in from_end_subway:
+            print(i)
+            if type(i[0]) == list:
+                print(len(i[0]))
+            else:
+                print(1)
+        print("--------------------------------\n")
+
+        if type(to_start_subway[0]) == tuple:
+            all_routes = all_routes_finder([to_start_subway], subway, from_end_subway)
+        else:
+            all_routes = all_routes_finder(to_start_subway, subway, from_end_subway)
+
+        return all_routes

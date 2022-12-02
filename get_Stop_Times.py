@@ -15,9 +15,9 @@ m = data_subway.cursor()
 
 def get_stop_times(one_possible_route):
     """
-    get_stop_times takes in a possible route and finds all of the trips
+    get_stop_times takes in a possible route and finds all the trips
     associated with the route_id of each step and adds a list of tuples of
-    all of the times whose index matches with the starting and ending stop
+    all the times whose index matches with the starting and ending stop
     """
     one_possible_route_wt_time = []
 
@@ -45,7 +45,6 @@ def get_stop_times(one_possible_route):
         # print("running...looking for route_id: " + str(cur_route_id) + "\n")
 
         for p in all_matching_routes_cor_order:
-
             index_str_stop_id = (ast.literal_eval(p[3])).index(start_stop_id)
             index_end_stop_id = (ast.literal_eval(p[3])).index(end_stop_id)
 
@@ -78,6 +77,7 @@ def check_contains(sample_route_order, start_stop_id, end_stop_id):
             return True
     return False
 
+
 def get_time(time):
     """
     get_time takes the time in string format and returns the values
@@ -87,9 +87,10 @@ def get_time(time):
     hours = int(timesplit[0])
     minutes = int(timesplit[1])
     seconds = int(timesplit[2])
-    return (hours,minutes,seconds)
+    return (hours, minutes, seconds)
 
-def check_time_after(time1,time2):
+
+def check_time_after(time1, time2):
     time_val1 = get_time(time1)
     time_val2 = get_time(time2)
     if time_val1[0] > time_val2[0]:
@@ -101,9 +102,10 @@ def check_time_after(time1,time2):
     else:
         return True
 
+
 def clean_time(trip):
     """
-    clean_time takes the ouput from get_stop_times and returns a list
+    clean_time takes the output from get_stop_times and returns a list
     of all permutations that have the correct chronological sequence 
     """
     output = get_stop_times(trip)
@@ -119,14 +121,24 @@ def clean_time(trip):
     for i in permuations:
         num_steps = len(i)
         is_correct = True
-        for j in range(num_steps-1):
-            if check_time_after(i[j][1],i[j+1][0]) == False:
+        for j in range(num_steps - 1):
+            if check_time_after(i[j][1], i[j + 1][0]) == False:
                 is_correct = False
                 break
         if is_correct: correctlist.append(i)
     for i in correctlist:
         permuation = []
         for j in range(len(output)):
-            permuation.append((output[j][0],i[j]))
+            permuation.append((output[j][0], i[j]))
         returnlist.append(permuation)
     return returnlist
+
+
+def get_all_times(all_trips):
+    trips_with_time = []
+
+    for i in all_trips:
+        for j in clean_time(i):
+            trips_with_time.append(j)
+
+    return trips_with_time

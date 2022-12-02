@@ -4,37 +4,11 @@ from bauhaus.utils import likelihood
 # Encoding that will store all of your constraints
 # User Price Group Logic Encoding: E
 E = Encoding()
-# Budget Constraint Logic Encoding: B
-B = Encoding()
-# Time Constraint Logic Encoding: T
-T = Encoding()
 
 
 # Class for Price Group propositions
 @proposition(E)
 class budget_prop:
-    # instantiate with name to be given to the proposition
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return f"E.{self.data}"
-
-
-# Class for Budget propositions
-@proposition(B)
-class budget_cons_prop:
-    # instantiate with name to be given to the proposition
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return f"E.{self.data}"
-
-
-# Class for Time propositions
-@proposition(T)
-class time_cons_prop:
     # instantiate with name to be given to the proposition
     def __init__(self, data):
         self.data = data
@@ -56,16 +30,6 @@ normal_other = budget_prop('normal user (others)')
 
 presto_adult = budget_prop('presto user (adult)')
 presto_other = budget_prop('presto user (others)')
-
-presto_day_pass = budget_prop('buy presto day pass')
-surpass_normal_price = budget_prop('cheaper to go with day pass')
-within_budget = budget_prop('trip plan is within budget')
-
-
-# Budget Constraint (2nd layer)
-
-
-# Time Constraint
 
 
 def price_grp_theory(hasPresto, age):
@@ -132,7 +96,7 @@ def price_grp_define(logic_dict):
 
 
 def main(test_Presto, test_age):
-    print("--- Price Group Logic ---")
+    print("\n--- Price Group Logic ---")
     print("\nConditions:")
     print(str(test_Presto) + ", " + str(test_age))
 
@@ -161,10 +125,6 @@ def main(test_Presto, test_age):
     #     # Literals are compiled to NNF here
     #     print(" %s: %.2f" % (vn, likelihood(logic_price_grp, v)))
     print("\n------------------------------------------\n")
-
-    print("---Time Constraints Logic---")
-    print("\nConditions:")
-    print(str(test_Presto) + ", " + str(test_age))
 
 # main(True, 24)
 # main(False, 24)
