@@ -138,7 +138,11 @@ def get_all_times(all_trips):
     trips_with_time = []
 
     for i in all_trips:
-        for j in clean_time(i):
-            trips_with_time.append(j)
+
+        out_clean_time = clean_time(i)
+
+        if type(out_clean_time) != bool:
+            for j in out_clean_time:
+                trips_with_time.append(j)
 
     return trips_with_time
