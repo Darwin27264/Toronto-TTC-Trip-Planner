@@ -1,5 +1,6 @@
 import ast
 import sqlite3
+import itertools
 
 # Importing database
 data_trip = sqlite3.connect('trips.db')
@@ -17,9 +18,13 @@ m = data_subway.cursor()
 # sample_output = [(14529, 14498, 'direct', 61457, 1),
 #                  (14546, 14552, 'direct', 61458, 1), (9276, 8000, 'close_to_end', 61363, 3),
 #                  (4049, 574, 'close_to_close', 61367, 3), (9230, 467, 'close_to_close', 61431, 3)]
-sample_output = [(9276, 8000, 'close_to_end', 61363, 3),
-                 (4049, 574, 'close_to_close', 61367, 3),
-                 (9230, 467, 'close_to_close', 61431, 3)]
+# sample_output = [(9276, 8000, 'close_to_end', 61363, 3),
+#                  (4049, 574, 'close_to_close', 61367, 3),
+#                  (9230, 467, 'close_to_close', 61431, 3)]
+# sample_output = [(3169, 14238, 'start_to_close', 61438, 3), (14468, 14499, 'close_to_close', 61457, 1), 
+#                   (14547, 14541, 'close_to_close', 61458, 1), (9276, 8000, 'close_to_end', 61363, 3), 
+#                   (7684, 5864, 'close_to_close', 61367, 3), (5922, 466, 'close_to_close', 61431, 3)]
+sample_output = [(466, 4745, 'close_to_end', 61431, 3), (4745, 9120, 'direct', 61312, 3)]
 
 
 def get_route_id(route_id):
@@ -35,7 +40,7 @@ def get_stop_times(one_possible_route):
     # For the every step in one possible route, from point a to point b
     for step in one_possible_route:
 
-        print(step)
+        # print(step)
 
         start_stop_id = step[0]
         end_stop_id = step[1]
@@ -44,7 +49,6 @@ def get_stop_times(one_possible_route):
         # Finding route
         t.execute("SELECT * FROM trips WHERE route_id=:route_id", {'route_id': cur_route_id})
         all_matching_routes = t.fetchall()
-
         all_matching_routes_cor_order = []
 
         for j in all_matching_routes:
@@ -56,10 +60,10 @@ def get_stop_times(one_possible_route):
         times = []
 
         # Debugging code
-        print("running...looking for route_id: " + str(cur_route_id) + "\n")
+        # print("running...looking for route_id: " + str(cur_route_id) + "\n")
 
         for p in all_matching_routes_cor_order:
-            print(p)
+            # print(p)
 
             index_str_stop_id = (ast.literal_eval(p[3])).index(start_stop_id)
             index_end_stop_id = (ast.literal_eval(p[3])).index(end_stop_id)
@@ -87,56 +91,96 @@ def check_contains(sample_route_order, start_stop_id, end_stop_id):
             return True
     return False
 
+def get_time(time):
+    timesplit = time.split(":")
+    hours = int(timesplit[0])
+    minutes = int(timesplit[1])
+    seconds = int(timesplit[2])
+    return (hours,minutes,seconds)
 
-# def clean_time():
+def check_time_after(time1,time2):
+    time_val1 = get_time(time1)
+    time_val2 = get_time(time2)
+    if time_val1[0] > time_val2[0]:
+        return False
+    elif time_val1[0] == time_val2[0] and time_val1[1] > time_val2[1]:
+        return False
+    elif time_val1[0] == time_val2[0] and time_val1[1] == time_val2[1] and time_val1[2] >= time_val2[2]:
+        return False
+    else:
+        return True
 
-"""
-What the code currently will do is output all the found time sets (every time for start_stop_id and end_stop_id)
-and append it into a list, which gets outputted for each stop. However, the bugs still needs to be fixed as some stops are
-still not finding anything. Could be a bug within get_TTC_Trip as mentioned (with subway). 
+def clean_time(trip):
 
-The current test case that has been enabled simply does not have a time within the order given (a manual check within the 
-data was done and no match ones with the correct order were spotted, only the opposite ordered were found).
+    """
+    What the code currently will do is output all the found time sets (every time for start_stop_id and end_stop_id)
+    and append it into a list, which gets outputted for each stop. However, the bugs still needs to be fixed as some stops are
+    still not finding anything. Could be a bug within get_TTC_Trip as mentioned (with subway). 
 
-There are no instances where stop_id 4049 comes before stop_id 574. Not sure if this is a bug or just simply how it is.
+    The current test case that has been enabled simply does not have a time within the order given (a manual check within the 
+    data was done and no match ones with the correct order were spotted, only the opposite ordered were found).
 
-Considering that this is only one way of getting from Point A to Point B, there should very likely be working ones out
-of the thousand solutions we find.
+    There are no instances where stop_id 4049 comes before stop_id 574. Not sure if this is a bug or just simply how it is.
 
-What the final output should be for get_stop_times is an output with each step and all the possible time sets put into a
-list an outputted along with, all in a tuple format. See below for example...
+    Considering that this is only one way of getting from Point A to Point B, there should very likely be working ones out
+    of the thousand solutions we find.
 
-This is a single step/stop... 
-((4049, 574, 'close_to_close', 61367, 3), [('4:51:08', '4:40:10'), ('4:21:08', 
-'4:10:10'), ('27:31:08', '27:20:10'), ('27:01:08', '26:50:10'), ('28:01:08', '27:50:10'), ('26:31:08', '26:20:10'), 
-('29:01:08', '28:50:09'), ('28:31:08', '28:20:09'), ('26:31:08', '26:20:10'), ('4:21:08', '4:10:10'), ('27:31:08', 
-'27:20:10'), ('29:31:08', '29:20:09'), ('26:01:08', '25:50:10'), ('6:01:08', '5:50:10'), ('27:01:08', '26:50:10'), 
-('28:01:08', '27:50:10'), ('5:21:08', '5:10:10'), ('4:51:08', '4:40:10'), ('6:01:08', '5:50:10'), ('5:01:08', 
-'4:50:10'), ('28:01:08', '27:50:10'), ('27:31:08', '27:20:10'), ('6:31:08', '6:20:10'), ('7:01:08', '6:50:10'), 
-('26:01:08', '25:50:10'), ('28:31:08', '28:20:09'), ('5:31:08', '5:20:10'), ('4:31:08', '4:20:10'), ('27:01:08', 
-'26:50:10'), ('29:01:08', '28:50:09'), ('26:31:08', '26:20:10'), ('29:31:08', '29:20:09'), ('29:01:08', '28:50:09'), 
-('28:31:08', '28:20:09'), ('6:01:08', '5:50:10'), ('26:01:08', '25:50:10'), ('7:01:08', '6:50:10'), ('5:01:08', 
-'4:50:10'), ('28:01:08', '27:50:10'), ('27:31:08', '27:20:10'), ('4:31:08', '4:20:10'), ('27:01:08', '26:50:10'), 
-('6:31:08', '6:20:10'), ('26:31:08', '26:20:10'), ('7:31:08', '7:20:10'), ('5:31:08', '5:20:10'), ('29:31:08', 
-'29:20:09')])
+    What the final output should be for get_stop_times is an output with each step and all the possible time sets put into a
+    list an outputted along with, all in a tuple format. See below for example...
 
-"ignore the wrong order with the time, that has been fixed, the format is what we want"
+    This is a single step/stop... 
+    ((4049, 574, 'close_to_close', 61367, 3), [('4:51:08', '4:40:10'), ('4:21:08', 
+    '4:10:10'), ('27:31:08', '27:20:10'), ('27:01:08', '26:50:10'), ('28:01:08', '27:50:10'), ('26:31:08', '26:20:10'), 
+    ('29:01:08', '28:50:09'), ('28:31:08', '28:20:09'), ('26:31:08', '26:20:10'), ('4:21:08', '4:10:10'), ('27:31:08', 
+    '27:20:10'), ('29:31:08', '29:20:09'), ('26:01:08', '25:50:10'), ('6:01:08', '5:50:10'), ('27:01:08', '26:50:10'), 
+    ('28:01:08', '27:50:10'), ('5:21:08', '5:10:10'), ('4:51:08', '4:40:10'), ('6:01:08', '5:50:10'), ('5:01:08', 
+    '4:50:10'), ('28:01:08', '27:50:10'), ('27:31:08', '27:20:10'), ('6:31:08', '6:20:10'), ('7:01:08', '6:50:10'), 
+    ('26:01:08', '25:50:10'), ('28:31:08', '28:20:09'), ('5:31:08', '5:20:10'), ('4:31:08', '4:20:10'), ('27:01:08', 
+    '26:50:10'), ('29:01:08', '28:50:09'), ('26:31:08', '26:20:10'), ('29:31:08', '29:20:09'), ('29:01:08', '28:50:09'), 
+    ('28:31:08', '28:20:09'), ('6:01:08', '5:50:10'), ('26:01:08', '25:50:10'), ('7:01:08', '6:50:10'), ('5:01:08', 
+    '4:50:10'), ('28:01:08', '27:50:10'), ('27:31:08', '27:20:10'), ('4:31:08', '4:20:10'), ('27:01:08', '26:50:10'), 
+    ('6:31:08', '6:20:10'), ('26:31:08', '26:20:10'), ('7:31:08', '7:20:10'), ('5:31:08', '5:20:10'), ('29:31:08', 
+    '29:20:09')])
 
-The commented out clean_time function is there to then use this data (from get_stop_times), get rid of all the 
-conflicting time sets. From step 1 and step 2, there are times that may be conflicting. For example, if step 1's 
-ending time in the time set is 9:00 and the beginning time in step 2 might have a time set that starts at 8:45, 
-this is not feasible as step 2 can't happen before step 1, therefore can't be before step 1 in terms of time either. 
+    "ignore the wrong order with the time, that has been fixed, the format is what we want"
 
-The final output we need to get is a list of all the possible ways to complete a trip in terms of time (as we now 
-already have all combinations of ways to get from A to B) by feeding the function a single trip instance (we can then 
-use a for loop to loop through all the trips possible)
-"""
+    The commented out clean_time function is there to then use this data (from get_stop_times), get rid of all the 
+    conflicting time sets. From step 1 and step 2, there are times that may be conflicting. For example, if step 1's 
+    ending time in the time set is 9:00 and the beginning time in step 2 might have a time set that starts at 8:45, 
+    this is not feasible as step 2 can't happen before step 1, therefore can't be before step 1 in terms of time either. 
 
-# for i in get_stop_times(sample_output):
-#     print("\n")
-#     print(i)
-#     print("\n")
+    The final output we need to get is a list of all the possible ways to complete a trip in terms of time (as we now 
+    already have all combinations of ways to get from A to B) by feeding the function a single trip instance (we can then 
+    use a for loop to loop through all the trips possible)
+    """
+    output = get_stop_times(trip)
+    # print(output)
+    iterlist = []
+    correctlist = []
+    returnlist = []
+    for i in output:
+        if i[1] == []:
+            return False
+        else:
+            iterlist.append(i[1])
+    permuations = list(itertools.product(*iterlist))
+    for i in permuations:
+        num_steps = len(i)
+        is_correct = True
+        for j in range(num_steps-1):
+            if check_time_after(i[j][1],i[j+1][0]) == False:
+                is_correct = False
+                break
+        if is_correct: correctlist.append(i)
+    for i in correctlist:
+        permuation = []
+        for j in range(len(output)):
+            permuation.append((output[j][0],i[j]))
+        returnlist.append(permuation)
+    return returnlist
 
-print(get_route_id(61367))
+# print(get_route_id(61367))
 
-# print(get_stop_times(sample_output))
+test = clean_time(sample_output)
+for i in test:
+    print(i)
