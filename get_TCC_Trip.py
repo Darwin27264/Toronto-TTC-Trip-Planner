@@ -595,10 +595,10 @@ all_routes = []
 # User input test
 # info = get_input()
 # test case
-info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
+# info = Input((4308, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((14238, ((12, 0),(12, 0))), (760, ((20, 0),(20, 0))), 19, True, 20,[])
 # info = Input((3169, ((12, 0),(12, 0))), (465, ((20, 0),(20, 0))), 19, True, 20,[])
-# info = Input((465, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
+info = Input((465, ((12, 0),(12, 0))), (3169, ((20, 0),(20, 0))), 19, True, 20,[])
 print_info(info)
 direct_routes = [find_direct_route(info.starting_stop.stop_id, info.ending_stop.stop_id, True)]
 if direct_routes[0] != [[]]:
@@ -696,6 +696,8 @@ else:
     else:
         all_routes = all_routes_finder(to_start_subway, subway, from_end_subway)
 
-for i in all_routes:
-    print(i)
+# for i in all_routes:
+#     print(i)
+print(len(all_routes))
+print(all_routes[10000])
 print("--------------------------------")
