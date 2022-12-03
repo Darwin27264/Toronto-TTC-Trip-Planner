@@ -1,8 +1,6 @@
 from get_Stop_Times import *
 from get_TCC_Trip import *
 
-from input import Input
-
 
 def start_program():
     # Get user input
@@ -29,4 +27,5 @@ def start_program():
     return (trips_with_time, pref_transit, user_age, hasPresto, user_budget)
 
 
-start_program()
+# Test
+# start_program()
