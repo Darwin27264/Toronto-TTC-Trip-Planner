@@ -1,6 +1,7 @@
 import ast
 import sqlite3
 import itertools
+import os
 
 # Importing database
 data_trip = sqlite3.connect('trips.db')
@@ -78,6 +79,19 @@ def check_contains(sample_route_order, start_stop_id, end_stop_id):
     return False
 
 
+def time_to_string(time):
+    hours = str(time[0])
+    minutes = str(time[1])
+    seconds = str(time[2])
+    if len(hours) == 1:
+        hours = "0" + hours
+    if len(minutes) == 1:
+        minutes = "0" + minutes
+    if len(seconds) == 1:
+        seconds = "0" + seconds
+    return hours + ":" + minutes + ":" + seconds
+
+
 def get_time(time):
     """
     get_time takes the time in string format and returns the values
@@ -97,7 +111,7 @@ def check_time_after(time1, time2):
         return False
     elif time_val1[0] == time_val2[0] and time_val1[1] > time_val2[1]:
         return False
-    elif time_val1[0] == time_val2[0] and time_val1[1] == time_val2[1] and time_val1[2] >= time_val2[2]:
+    elif time_val1[0] == time_val2[0] and time_val1[1] == time_val2[1] and time_val1[2] > time_val2[2]:
         return False
     else:
         return True
@@ -110,35 +124,68 @@ def clean_time(trip):
     """
     output = get_stop_times(trip)
     iterlist = []
-    correctlist = []
+    permutationlist = []
     returnlist = []
     for i in output:
-        if i[1] == []:
+        if i[1] == [] and i[0][-1] != -1:
             return False
-        else:
+        elif i[1] != []:
             iterlist.append(i[1])
     permuations = list(itertools.product(*iterlist))
-    for i in permuations:
-        num_steps = len(i)
-        is_correct = True
-        for j in range(num_steps - 1):
-            if check_time_after(i[j][1], i[j + 1][0]) == False:
-                is_correct = False
-                break
-        if is_correct: correctlist.append(i)
-    for i in correctlist:
-        permuation = []
-        for j in range(len(output)):
-            permuation.append((output[j][0], [i[j]]))
-        returnlist.append(permuation)
+    count = 0
+    for j in permuations:
+        count += 1
+        os.system('cls')
+        print("Number of permutations: " + str(len(permuations)))
+        print("Current Permuation: " + str(count))
+        one_trip = []
+        counter = 0
+        for i in range (len(output)):
+            if output[i][0][-1] == -1:
+                if len(one_trip) == 0:
+                    one_trip.append((output[i][0],[('00:00:00','00:05:00')]))
+                else:
+                    prev_time = list(get_time(output[i-1][1][0][1]))
+                    prev_time_string = time_to_string(tuple(prev_time))
+                    if prev_time[1] + 5 >= 60:
+                        prev_time[0] += 1
+                        prev_time[1] = (prev_time[1] + 5) - 60
+                    else:
+                        prev_time[1] = 5 + prev_time[1]
+                    time_string = time_to_string(tuple(prev_time))
+                    one_trip.append((output[i][0],[(prev_time_string,time_string)]))
+            elif output[i-1][0][-1] == -1 and len(one_trip) == 1:
+                time2 = j[counter][0]
+                first_time = list(get_time(j[counter][0]))
+                if first_time[1] - 5 < 0:
+                    first_time[0] -= 1
+                    first_time[1] = 60 - (5-first_time[1])
+                else:
+                    first_time[1] = 5 + first_time[1]
+                time1 = time_to_string(tuple(first_time))
+                one_trip[0][1][0] = (time1,time2)
+                one_trip.append((output[i][0],[(j[counter])]))
+                counter += 1
+            else:
+                one_trip.append((output[i][0],[(j[counter])]))
+                counter += 1
+            permutationlist.append(one_trip)
+    for i in permutationlist:
+        if len(i) == 1:
+            returnlist.append(i)
+        else:
+            for j in range(len(i)-1):
+                correct = True
+                if check_time_after(i[j][1][0][1],i[j+1][1][0][0]) == False:
+                    correct = False
+                    break
+                if correct == True: returnlist.append(i)
     return returnlist
-
 
 def get_all_times(all_trips):
     trips_with_time = []
 
     for i in all_trips:
-        print(i)
         out_clean_time = clean_time(i)
 
         if type(out_clean_time) != bool:

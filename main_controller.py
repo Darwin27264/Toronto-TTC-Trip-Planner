@@ -23,9 +23,9 @@ def start_program():
     all_trips = get_trips(user_input)
     print(all_trips)
     trips_with_time = get_all_times(all_trips)
-
-    print(trips_with_time)
-
+    for i in trips_with_time:
+        print(i)
+    
     return (trips_with_time, pref_transit, user_age, hasPresto, user_budget)
 
 

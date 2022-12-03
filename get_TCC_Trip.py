@@ -629,11 +629,6 @@ def get_trips(info):
     if direct_routes[0] != [[]]:
 
         for i in direct_routes:
-            print(i)
-            if type(i[0]) == list:
-                print(len(i[0]))
-            else:
-                print(1)
 
             if type(i[0]) == list:
                 for j in i[0]:
@@ -641,7 +636,7 @@ def get_trips(info):
             else:
                 all_routes.append([i[0]])
 
-        return direct_routes
+        return all_routes
 
         print("--------------------------------")
     else:
