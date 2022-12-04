@@ -485,17 +485,10 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
     unique_combinations = []
     to_sub_final = []
 
-    # print(len(to_sub_all))
-    # print(to_sub_all)
-    # print("\n")
-
     while i < len(to_sub) - 1:
         if type((to_sub[i + 1][0])) == tuple:
 
             exp_temp = [(to_sub[i + 1][0])]
-
-            # print(len(exp_temp))
-            # print(exp_temp)
 
             for r in itertools.product(to_sub_all, exp_temp):
                 unique_combinations.append(r)
@@ -503,11 +496,7 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
             to_sub_all = unique_combinations
             unique_combinations = []
 
-            # print("total count: " + str(len(to_sub_all)))
-            # print("\n")
         else:
-            # print(len(to_sub[i + 1][0]))
-            # print(to_sub[i + 1][0])
 
             for r in itertools.product(to_sub_all, to_sub[i + 1][0]):
                 unique_combinations.append(r)
@@ -515,8 +504,6 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
             to_sub_all = unique_combinations
             unique_combinations = []
 
-            # print("total count: " + str(len(to_sub_all)))
-            # print("\n")
         i += 1
 
     if type(to_sub_all) != tuple:
@@ -601,8 +588,6 @@ def all_routes_finder(to_start_sub, sub, from_end_sub):
         i += 1
 
     for each_sub in in_sub_final:
-        # print("flattening")
-        # print(each_sub)
         all_pos_routes.append(flatten_tuple_in_sub(each_sub))
 
     print("Total ways to go from initial location to destination: " + str(len(all_pos_routes)))

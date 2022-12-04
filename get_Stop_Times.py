@@ -140,12 +140,12 @@ def clean_time(trip):
         print("Current Permuation: " + str(count))
         one_trip = []
         counter = 0
-        for i in range (len(output)):
+        for i in range(len(output)):
             if output[i][0][-1] == -1:
                 if len(one_trip) == 0:
-                    one_trip.append((output[i][0],[('00:00:00','00:05:00')]))
+                    one_trip.append((output[i][0], [('00:00:00', '00:05:00')]))
                 else:
-                    prev_time = list(get_time(output[i-1][1][0][1]))
+                    prev_time = list(get_time(output[i - 1][1][0][1]))
                     prev_time_string = time_to_string(tuple(prev_time))
                     if prev_time[1] + 5 >= 60:
                         prev_time[0] += 1
@@ -153,34 +153,35 @@ def clean_time(trip):
                     else:
                         prev_time[1] = 5 + prev_time[1]
                     time_string = time_to_string(tuple(prev_time))
-                    one_trip.append((output[i][0],[(prev_time_string,time_string)]))
-            elif output[i-1][0][-1] == -1 and len(one_trip) == 1:
+                    one_trip.append((output[i][0], [(prev_time_string, time_string)]))
+            elif output[i - 1][0][-1] == -1 and len(one_trip) == 1:
                 time2 = j[counter][0]
                 first_time = list(get_time(j[counter][0]))
                 if first_time[1] - 5 < 0:
                     first_time[0] -= 1
-                    first_time[1] = 60 - (5-first_time[1])
+                    first_time[1] = 60 - (5 - first_time[1])
                 else:
                     first_time[1] = 5 + first_time[1]
                 time1 = time_to_string(tuple(first_time))
-                one_trip[0][1][0] = (time1,time2)
-                one_trip.append((output[i][0],[(j[counter])]))
+                one_trip[0][1][0] = (time1, time2)
+                one_trip.append((output[i][0], [(j[counter])]))
                 counter += 1
             else:
-                one_trip.append((output[i][0],[(j[counter])]))
+                one_trip.append((output[i][0], [(j[counter])]))
                 counter += 1
             permutationlist.append(one_trip)
     for i in permutationlist:
         if len(i) == 1:
             returnlist.append(i)
         else:
-            for j in range(len(i)-1):
+            for j in range(len(i) - 1):
                 correct = True
-                if check_time_after(i[j][1][0][1],i[j+1][1][0][0]) == False:
+                if check_time_after(i[j][1][0][1], i[j + 1][1][0][0]) == False:
                     correct = False
                     break
                 if correct == True: returnlist.append(i)
     return returnlist
+
 
 def get_all_times(all_trips):
     trips_with_time = []

@@ -1,5 +1,4 @@
 from bauhaus import Encoding, proposition, constraint
-from bauhaus.utils import likelihood
 
 # Encoding that will store all of your constraints
 # User Price Group Logic Encoding: E
@@ -116,14 +115,6 @@ def main(test_Presto, test_age):
     print("\nPrice Group + Price")
     print(price_grp_define(budget_solution))
 
-    # print("\nVariable likelihoods:")
-    # for v, vn in zip(
-    #         [kid, adult, youth, senior, presto, normal_adult, normal_other, presto_adult, presto_other, presto_day_pass,
-    #          surpass_normal_price, within_budget],
-    #         'kayspodpodsw'):
-    #     # Ensure that you only send these functions NNF formulas
-    #     # Literals are compiled to NNF here
-    #     print(" %s: %.2f" % (vn, likelihood(logic_price_grp, v)))
     print("\n------------------------------------------\n")
 
 # main(True, 24)
