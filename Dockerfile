@@ -26,9 +26,17 @@ RUN pip3 install os
 RUN pip3 install sqlite3
 # install datetime Library
 RUN pip3 install datetime
-# import JSON, os.path in case of needing to unzip
+# install JSON, os.path in case of needing to unzip
 RUN pip3 install json
 RUN pip3 install os.path
+# install itertools
+RUN pip3 install itertools
+# install ast
+RUN pip3 install ast
+# install math
+RUN pip3 install math
+# install input
+RUN pip3 install input
 
 # install dsharp to run in the container
 RUN curl https://mulab.ai/cisc-204/dsharp -o /usr/local/bin/dsharp
