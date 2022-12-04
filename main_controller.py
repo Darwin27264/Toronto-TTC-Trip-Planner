@@ -1,5 +1,5 @@
 from get_Stop_Times import *
-from get_TCC_Trip import *
+from get_TTC_Trip import *
 
 
 def time_to_string(time):
