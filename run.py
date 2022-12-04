@@ -382,6 +382,8 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
                     rush_hour[indexes] & more_than_fifty_strtcar_bus[indexes]), within_time_cons[indexes]))
 
         # Budget Constraints (Layer 2)
+
+        # Converting time back into usable format
         if user_st_time < 1000:
             user_st = "0" + str(user_st_time)[0] + ":" + str(user_st_time)[1] + str(user_st_time)[2]
         else:
@@ -395,6 +397,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
         st_time = datetime.strptime(user_ed, '%H:%M')
         ed_time = datetime.strptime(user_st, '%H:%M')
 
+        # Caldulate the total price it would cost the user based on the trip length in terms of time
         total_trip_time = abs((ed_time - st_time).total_seconds()) / 3600
         total_price = math.ceil(((float(total_trip_time)) / 2) * float(price_per_2h))
 
@@ -444,7 +447,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
         # transit_type_percentages format: (percent_street_car, percent_subway, percent_bus, percent_walking)
         most_percent = max(transit_type_percentages)
         inde = transit_type_percentages.index(most_percent)
-
+        # inde is the index variable determining which one of the transit types makes up most of the trip
         if inde == 0:
             T.add_constraint(mostly_streetcar[indexes])
             T.add_constraint(iff(prefer_streetcar[indexes] & mostly_streetcar[indexes], within_preference[indexes]))
@@ -454,10 +457,8 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
         elif inde == 2:
             T.add_constraint(mostly_bus[indexes])
             T.add_constraint(iff(prefer_bus[indexes] & mostly_bus[indexes], within_preference[indexes]))
-
         elif inde == 3:
             T.add_constraint(mostly_walking[indexes])
-
             T.add_constraint(iff(prefer_walking[indexes] & mostly_walking[indexes], within_preference[indexes]))
 
         # Solution is only valid if both time constraint and budget constraints are met
@@ -469,6 +470,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
     return T
 
 
+# Test Data
 # >50% slow transit type & >60% rush hour, expect no solution
 sample_trip_1 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
                  ((4049, 574, 'test', 61367, 3), [('9:51:08', '10:40:10')]),
@@ -479,41 +481,44 @@ sample_trip_1 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
                  ((4049, 574, 'test', 61367, 3), [('17:51:08', '18:40:10')]),
                  ((4049, 574, 'test', 61367, 3), [('16:51:08', '14:40:10')])]
 # >50% slow transit type & <60% rush hour, expect solution
-sample_trip_2 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')])]
+sample_trip_2 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'test', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')])]
 # <50% slow transit type & >60% rush hour, expect solution
-sample_trip_3 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('10:51:08', '11:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('16:51:08', '17:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('17:51:08', '18:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('18:51:08', '17:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('16:51:08', '14:40:10')])]
+sample_trip_3 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('16:51:08', '17:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('17:51:08', '18:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('18:51:08', '17:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('16:51:08', '14:40:10')])]
 # <50% slow transit type & <60% rush hour, expect solution
-sample_trip_4 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('11:51:08', '12:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')])]
+sample_trip_4 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'test', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('11:51:08', '12:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')])]
 
 
 def main():
+    # Check whether to run in test mode (runs preset test data)
     test_mode = input("Run test? (Y/N): ")
 
     if test_mode == "N" or test_mode == "n":
-        # Gathering and preparing data needed of logic
+        # Gathering and preparing data needed of logic, calls start_program which
+        # will call all the necessary functions in order to gather user data and run
+        # the algorithm
         all_data = start_program()
-
+        # Initialize variables to store each value given by the user input data
         all_trip_wt_time = all_data[0]
         pref_transit = all_data[1]
         user_age = all_data[2]
@@ -528,10 +533,9 @@ def main():
         print("Has Presto: " + str(hasPresto) + ", Age: " + str(user_age))
 
         logic_price_grp = price_grp_theory(hasPresto, user_age)
-        # Don't compile until you're finished adding all your constraints!
+        # Compiling model
         logic_price_grp = logic_price_grp.compile()
-        # After compilation (and only after), you can check some properties
-        # of your model:
+
         print("\nSatisfiable: %s" % logic_price_grp.satisfiable())
         # print("# Solutions: %d" % count_solutions(logic_price_grp))
         print("Number of Solutions: %s" % logic_price_grp.model_count())
@@ -549,15 +553,16 @@ def main():
 
         # Beginning of Main Logic
         print("--- Main Logic ---\n")
-
+        # Runs prop_setup method to initialize all dictionaries that will be carrying
+        # all the propositions
         print("Setting up propositions for all possible trip instance...")
         prop_setup(all_trip_wt_time)
 
         # Need to feed in (desired starting time, desired arrival time, singular trip option, price group pricing,
-        # user budget, preferred transit type)
+        # user budget, preferred transit type), adding all propositions
         main_theory(desired_departure_time, desired_arrival_time, all_trip_wt_time, price_grp_price, user_budget,
                     pref_transit)
-
+        # Compiling main logic
         logic_main = T.compile()
 
         print("\nSatisfiable: %s" % logic_main.satisfiable())
@@ -589,8 +594,8 @@ def main():
         print(ind)
 
         print("\n------------------------------------------")
-        input("\nPress any key to contiue...")
-        # Find OS and set clear termial command
+        input("\nPress any key to continue...")
+        # Find OS and set clear terminal command
         if platform.system() == 'Windows':
             clearTermial = 'cls'
         elif platform.system() == 'Darwin':
@@ -599,9 +604,9 @@ def main():
             clearTermial = 'clear'
         else:
             clearTermial = 'clear'
-
+        # Clear the terminal for the final results
         os.system(clearTermial)
-
+        # User readable output
         print("--- Results ---\n")
         print("Total number of trips possible meeting the user inputs: " + str(true_solutions))
 
@@ -627,16 +632,16 @@ def main():
 
     else:
         # Test run theories
-
         print("Running Tests...\n\n")
 
-        print("Test 1: \n")
+        print("Test: \n")
         print("--- Parameters ---\n")
 
+        # Test run parameters
         test_departure_time = 700
         test_arrival_time = 1450
-        test_grp_price = 2.3
-        test_budget = 15
+        test_grp_price = 3.2
+        test_budget = 2
         test_pref_transit = 5
 
         test_1 = [sample_trip_2, sample_trip_3, sample_trip_1]
@@ -677,8 +682,8 @@ def main():
         print(ind)
 
         print("\n------------------------------------------")
-        input("\nPress any key to contiue...")
-        # Find OS and set clear termial command
+        input("\nPress any key to continue...")
+        # Find OS and set clear terminal command
         if platform.system() == 'Windows':
             clearTermial = 'cls'
         elif platform.system() == 'Darwin':
@@ -715,3 +720,4 @@ def main():
 
 
 main()
+
