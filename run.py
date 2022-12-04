@@ -132,6 +132,8 @@ def prop_setup(trips):
         within_time_cons[indexer] = solution_prop('within time constraint' + str(indexer))
         within_budget_cons[indexer] = solution_prop('within budget constraint' + str(indexer))
         solution[indexer] = solution_prop('valid solution' + str(indexer))
+
+        # Increment index
         indexer += 1
 
     # 17 props total
@@ -261,7 +263,6 @@ def price_grp_theory(hasPresto, age):
     if age <= 12:
         E.add_constraint(kid)
         E.add_constraint(~presto)
-
     elif 13 <= age <= 19:
         E.add_constraint(youth)
     elif 20 <= age < 65:
@@ -397,7 +398,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
         st_time = datetime.strptime(user_ed, '%H:%M')
         ed_time = datetime.strptime(user_st, '%H:%M')
 
-        # Caldulate the total price it would cost the user based on the trip length in terms of time
+        # Calculate the total price it would cost the user based on the trip length in terms of time
         total_trip_time = abs((ed_time - st_time).total_seconds()) / 3600
         total_price = math.ceil(((float(total_trip_time)) / 2) * float(price_per_2h))
 
@@ -425,24 +426,19 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
 
         if user_pref_transit == 0:
             T.add_constraint(prefer_streetcar[indexes])
-            T.add_constraint(
-                ~prefer_subway[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
+            T.add_constraint(~prefer_subway[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
         elif user_pref_transit == 1:
             T.add_constraint(prefer_subway[indexes])
-            T.add_constraint(
-                ~prefer_streetcar[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
+            T.add_constraint(~prefer_streetcar[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
         elif user_pref_transit == -1:
             T.add_constraint(prefer_walking[indexes])
-            T.add_constraint(
-                ~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
+            T.add_constraint(~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_bus[indexes] & ~no_pref[indexes])
         elif user_pref_transit == 3:
             T.add_constraint(prefer_bus[indexes])
-            T.add_constraint(
-                ~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_walking[indexes] & ~no_pref[indexes])
+            T.add_constraint(~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_walking[indexes] & ~no_pref[indexes])
         elif user_pref_transit == 5:
             T.add_constraint(no_pref[indexes])
-            T.add_constraint(
-                ~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes])
+            T.add_constraint(~prefer_streetcar[indexes] & ~prefer_subway[indexes] & ~prefer_walking[indexes] & ~prefer_bus[indexes])
 
         # transit_type_percentages format: (percent_street_car, percent_subway, percent_bus, percent_walking)
         most_percent = max(transit_type_percentages)
