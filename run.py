@@ -4,6 +4,10 @@ from bauhaus.utils import likelihood
 from datetime import datetime
 from time import strptime
 
+import os
+import platform
+
+import random
 import math
 
 from main_controller import start_program
@@ -12,7 +16,6 @@ from main_controller import start_program
 T = Encoding()
 # User Price Group Logic Encoding: E
 E = Encoding()
-
 
 # Proposition Dictionaries for Layer 2
 # Time
@@ -105,8 +108,8 @@ def prop_setup(trips):
     indexer = 0
     for _ in trips:
         # Time
-        valid_start_time[indexer] = time_prop('valid start time (bus)' + str(indexer))
-        valid_end_time[indexer] = time_prop('valid end time (bus)' + str(indexer))
+        valid_start_time[indexer] = time_prop('valid start time (transit)' + str(indexer))
+        valid_end_time[indexer] = time_prop('valid end time (transit)' + str(indexer))
 
         rush_hour[indexer] = time_prop('rush hour (>60% of trip within rush hours detected)' + str(indexer))
         more_than_fifty_strtcar_bus[indexer] = time_prop('>50% busses or street cars within trip' + str(indexer))
@@ -220,8 +223,8 @@ def rh_factor_calc(single_trip):
         for every_step in single_trip:
             times.append(every_step[1])
 
-        trip_start_time = time_to_int(times[0][0])
-        trip_end_time = time_to_int(times[-1][1])
+        trip_start_time = time_to_int(times[0][0][0])
+        trip_end_time = time_to_int(times[-1][0][1])
 
         return (trip_start_time, trip_end_time, 0, 0)
     else:
@@ -376,7 +379,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
 
         # Rush hour implies there can't be more than 50% slow transit types within the trip
         T.add_constraint(iff((valid_start_time[indexes] & valid_end_time[indexes]) & ~(
-                rush_hour[indexes] & more_than_fifty_strtcar_bus[indexes]), within_time_cons[indexes]))
+                    rush_hour[indexes] & more_than_fifty_strtcar_bus[indexes]), within_time_cons[indexes]))
 
         # Budget Constraints (Layer 2)
         if user_st_time < 1000:
@@ -393,7 +396,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
         ed_time = datetime.strptime(user_st, '%H:%M')
 
         total_trip_time = abs((ed_time - st_time).total_seconds()) / 3600
-        total_price = math.ceil(((total_trip_time) / 2) * price_per_2h)
+        total_price = math.ceil(((float(total_trip_time)) / 2) * float(price_per_2h))
 
         correct_price = 0
 
@@ -459,7 +462,7 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
 
         # Solution is only valid if both time constraint and budget constraints are met
         T.add_constraint(iff((within_time_cons[indexes] & within_budget_cons[indexes] & (
-                within_preference[indexes] | no_pref[indexes])), solution[indexes]))
+                    within_preference[indexes] | no_pref[indexes])), solution[indexes]))
 
         indexes += 1
 
@@ -467,14 +470,14 @@ def main_theory(user_departure_time, user_arrival_time, all_trip_with_time, pric
 
 
 # >50% slow transit type & >60% rush hour, expect no solution
-sample_trip_1 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 1), [('10:51:08', '11:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('8:51:08', '9:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('12:51:08', '13:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('17:51:08', '18:40:10')]),
-                 ((4049, 574, 'close_to_close', 61367, 3), [('16:51:08', '14:40:10')])]
+sample_trip_1 = [((4049, 574, 'test', 61367, 3), [('7:51:08', '9:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('9:51:08', '10:40:10')]),
+                 ((4049, 574, 'test', 61367, 1), [('10:51:08', '11:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('8:51:08', '9:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('12:51:08', '13:40:10')]),
+                 ((4049, 574, 'test', 61367, -1), [('13:51:08', '14:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('17:51:08', '18:40:10')]),
+                 ((4049, 574, 'test', 61367, 3), [('16:51:08', '14:40:10')])]
 # >50% slow transit type & <60% rush hour, expect solution
 sample_trip_2 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10')]),
                  ((4049, 574, 'close_to_close', 61367, 3), [('9:51:08', '10:40:10')]),
@@ -503,81 +506,201 @@ sample_trip_4 = [((4049, 574, 'close_to_close', 61367, 3), [('7:51:08', '9:40:10
                  ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')]),
                  ((4049, 574, 'close_to_close', 61367, -1), [('13:51:08', '14:40:10')])]
 
-final_sample_trip = [sample_trip_1, sample_trip_3, sample_trip_2]
-
 
 def main():
+    test_mode = input("Run test? (Y/N): ")
 
-    # Gathering and preparing data needed of logic
-    all_data = start_program()
+    if test_mode == "N" or test_mode == "n":
+        # Gathering and preparing data needed of logic
+        all_data = start_program()
 
-    all_trip_wt_time = all_data[0]
-    pref_transit = all_data[1]
-    user_age = all_data[2]
-    hasPresto = all_data[3]
-    user_budget = all_data[4]
-    desired_departure_time = all_data[5]
-    desired_arrival_time = all_data[6]
+        all_trip_wt_time = all_data[0]
+        pref_transit = all_data[1]
+        user_age = all_data[2]
+        hasPresto = all_data[3]
+        user_budget = all_data[4]
+        desired_departure_time = all_data[5]
+        desired_arrival_time = all_data[6]
 
-    # Layer 1 Price Group Logic
-    print("\n--- Price Group Logic ---")
-    print("\nConditions:")
-    print(str(hasPresto) + ", " + str(user_age))
+        # Layer 1 Price Group Logic
+        print("\n--- Price Group Logic ---")
+        print("\nConditions:")
+        print("Has Presto: " + str(hasPresto) + ", Age: " + str(user_age))
 
-    logic_price_grp = price_grp_theory(hasPresto, user_age)
-    # Don't compile until you're finished adding all your constraints!
-    logic_price_grp = logic_price_grp.compile()
-    # After compilation (and only after), you can check some properties
-    # of your model:
-    print("\nSatisfiable: %s" % logic_price_grp.satisfiable())
-    # print("# Solutions: %d" % count_solutions(logic_price_grp))
-    print("Number of Solutions: %s" % logic_price_grp.model_count())
+        logic_price_grp = price_grp_theory(hasPresto, user_age)
+        # Don't compile until you're finished adding all your constraints!
+        logic_price_grp = logic_price_grp.compile()
+        # After compilation (and only after), you can check some properties
+        # of your model:
+        print("\nSatisfiable: %s" % logic_price_grp.satisfiable())
+        # print("# Solutions: %d" % count_solutions(logic_price_grp))
+        print("Number of Solutions: %s" % logic_price_grp.model_count())
 
-    budget_solution = logic_price_grp.solve()
+        budget_solution = logic_price_grp.solve()
 
-    print("Solution: %s" % budget_solution)
-    # find the specific price group
-    print("\nPrice Group + Price")
-    price_grp_price = price_grp_define(budget_solution)
+        print("Solution: %s" % budget_solution)
+        # find the specific price group
+        print("\nPrice Group + Price")
+        gp_price = price_grp_define(budget_solution)
+        print(gp_price)
+        price_grp_price = gp_price[-1]
 
-    print("\n------------------------------------------\n")
+        print("\n------------------------------------------\n")
 
-    # Beginning of Main Logic
-    print("--- Main Logic ---")
+        # Beginning of Main Logic
+        print("--- Main Logic ---\n")
 
-    print("Setting up propositions for all possible trip instance...")
-    prop_setup(all_trip_wt_time)
+        print("Setting up propositions for all possible trip instance...")
+        prop_setup(all_trip_wt_time)
 
-    # Need to feed in (desired starting time, desired arrival time, singular trip option, price group pricing,
-    # user budget, preferred transit type)
-    main_theory(desired_departure_time, desired_arrival_time, final_sample_trip, price_grp_price, user_budget, pref_transit)
+        # Need to feed in (desired starting time, desired arrival time, singular trip option, price group pricing,
+        # user budget, preferred transit type)
+        main_theory(desired_departure_time, desired_arrival_time, all_trip_wt_time, price_grp_price, user_budget,
+                    pref_transit)
 
-    logic_main = T.compile()
+        logic_main = T.compile()
 
-    print("\nSatisfiable: %s" % logic_main.satisfiable())
-    print("Number of Solutions: %s" % logic_main.model_count())
+        print("\nSatisfiable: %s" % logic_main.satisfiable())
+        print("Number of Solutions: %s" % logic_main.model_count())
 
-    final_solution = logic_main.solve()
+        final_solution = logic_main.solve()
 
-    print("Solution: %s" % final_solution)
-    print(len(logic_main.solve()))
+        print("Solution: %s" % final_solution)
 
-    # Final Output
-    solution_keys = []
-    for i in solution:
-        solution_keys.append(solution[i])
+        # Final Output
+        solution_keys = []
+        for i in solution:
+            solution_keys.append(solution[i])
 
-    final_solution_keys = []
-    true_solutions = 0
-    for key in solution_keys:
-        if final_solution.get(key):
-            true_solutions += 1
-            final_solution_keys.append(key)
+        final_solution_keys = []
+        true_solutions = 0
+        for key in solution_keys:
+            if final_solution.get(key):
+                true_solutions += 1
+                final_solution_keys.append(key)
 
-    all_solution_index = []
-    for j in final_solution_keys:
-        final_key_index = int(str(j)[-1])
-        all_solution_index.append(final_key_index)
+        all_solution_index = []
+        for j in final_solution_keys:
+            final_key_index = int(str(j)[-1])
+            all_solution_index.append(final_key_index)
+
+        print("\n------------------------------------------")
+        input("\nPress any key to contiue...")
+        # Find OS and set clear termial command
+        if platform.system() == 'Windows':
+            clearTermial = 'cls'
+        elif platform.system() == 'Darwin':
+            clearTermial = 'clear'
+        elif platform.system() == 'Linux':
+            clearTermial = 'clear'
+        else:
+            clearTermial = 'clear'
+
+        os.system(clearTermial)
+
+        print("--- Results ---\n")
+        print("Total number of trips possible meeting the user inputs: " + str(true_solutions))
+
+        if true_solutions != 0:
+
+            while True:
+
+                entered = input(
+                    "\nEnter anything to see a random solution trip, or enter (exit) to exit the program. \n")
+
+                if entered == "exit" or entered == "EXIT":
+                    break
+                else:
+                    rando = random.randint(0, (true_solutions - 1))
+
+                    print("Currently showing trip index: " + str(rando) + "\n")
+                    print(all_trip_wt_time[rando])
+
+        else:
+            print("No possible trips were found meeting user's needs.")
+
+    else:
+        # Test run theories
+
+        print("Running Tests...\n\n")
+
+        print("Test 1: \n")
+        print("--- Parameters ---\n")
+
+        test_departure_time = 700
+        test_arrival_time = 1450
+        test_grp_price = 2.3
+        test_budget = 15
+        test_pref_transit = 5
+
+        test_1 = [sample_trip_2, sample_trip_3, sample_trip_1]
+
+        print("Setting up propositions for test trip instances...")
+        prop_setup(test_1)
+
+        main_theory(test_departure_time, test_arrival_time, test_1, test_grp_price, test_budget, test_pref_transit)
+
+        logic_main = T.compile()
+
+        print("\nSatisfiable: %s" % logic_main.satisfiable())
+        print("Number of Solutions: %s" % logic_main.model_count())
+
+        final_solution = logic_main.solve()
+
+        print("Solution: %s" % final_solution)
+
+        # Final Output
+        solution_keys = []
+        for i in solution:
+            solution_keys.append(solution[i])
+
+        final_solution_keys = []
+        true_solutions = 0
+
+        for key in solution_keys:
+            if final_solution.get(key):
+                true_solutions += 1
+                final_solution_keys.append(key)
+
+        all_solution_index = []
+        for j in final_solution_keys:
+            final_key_index = int(str(j)[-1])
+            all_solution_index.append(final_key_index)
+
+        print("\n------------------------------------------")
+        input("\nPress any key to contiue...")
+        # Find OS and set clear termial command
+        if platform.system() == 'Windows':
+            clearTermial = 'cls'
+        elif platform.system() == 'Darwin':
+            clearTermial = 'clear'
+        elif platform.system() == 'Linux':
+            clearTermial = 'clear'
+        else:
+            clearTermial = 'clear'
+
+        os.system(clearTermial)
+
+        print("--- Results ---\n")
+        print("Total number of trips possible meeting test case: " + str(true_solutions))
+
+        if true_solutions != 0:
+
+            while True:
+
+                entered = input(
+                    "\nEnter anything to see a random solution trip, or enter (exit) to exit the program. \n")
+
+                if entered == "exit" or entered == "EXIT":
+                    break
+                else:
+                    rando = random.randint(0, (true_solutions - 1))
+
+                    print("Currently showing trip index: " + str(rando) + "\n")
+                    print(test_1[rando])
+
+        else:
+            print("No possible trips were found for the test case.")
 
 
 main()
