@@ -12,14 +12,11 @@ def time_to_string(time):
     """
     hours = str(time[0])
     minutes = str(time[1])
-    seconds = str(time[2])
 
     if len(hours) == 1:
         hours = "0" + hours
     if len(minutes) == 1:
         minutes = "0" + minutes
-    if len(seconds) == 1:
-        seconds = "0" + seconds
 
     return hours + ":" + minutes
 
@@ -49,22 +46,22 @@ def start_program():
     pref_transit = user_input.pref_transit
     user_age = user_input.age
     hasPresto = user_input.hasPresto
-    user_budget = user_input.budget
+    user_budget = int(user_input.budget)
 
     start_dest_info = user_input.starting_stop
     end_dest_info = user_input.ending_stop
 
-    desired_departure_time = time_to_int(time_to_string(user_input.starting_stop.arrive_time))
-    desired_arrival_time = time_to_int(time_to_string(user_input.ending_stop.arrive_time))
+    desired_departure_time = time_to_int(time_to_string(start_dest_info.arrive_time))
+    desired_arrival_time = time_to_int(time_to_string(end_dest_info.arrive_time))
 
     all_trips = get_trips(user_input)
     print(all_trips)
     trips_with_time = get_all_times(all_trips)
     for i in trips_with_time:
         print(i)
-    
-    return (trips_with_time, pref_transit, user_age, hasPresto, user_budget, desired_departure_time, desired_arrival_time)
 
+    return (
+    trips_with_time, pref_transit, user_age, hasPresto, user_budget, desired_departure_time, desired_arrival_time)
 
 # Test
 # start_program()
