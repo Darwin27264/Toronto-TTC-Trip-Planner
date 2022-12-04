@@ -573,16 +573,20 @@ def main():
             solution_keys.append(solution[i])
 
         final_solution_keys = []
+        ind = []
+        index_tracker = 0
         true_solutions = 0
+
         for key in solution_keys:
             if final_solution.get(key):
                 true_solutions += 1
+                ind.append(index_tracker)
                 final_solution_keys.append(key)
 
-        all_solution_index = []
-        for j in final_solution_keys:
-            final_key_index = int(str(j)[-1])
-            all_solution_index.append(final_key_index)
+            index_tracker += 1
+
+        print(final_solution_keys)
+        print(ind)
 
         print("\n------------------------------------------")
         input("\nPress any key to contiue...")
@@ -613,8 +617,10 @@ def main():
                 else:
                     rando = random.randint(0, (true_solutions - 1))
 
-                    print("Currently showing trip index: " + str(rando) + "\n")
-                    print(all_trip_wt_time[rando])
+                    ans_index = ind[rando]
+
+                    print("Currently showing trip index: " + str(ans_index) + "\n")
+                    print(all_trip_wt_time[ans_index])
 
         else:
             print("No possible trips were found meeting user's needs.")
@@ -655,17 +661,20 @@ def main():
             solution_keys.append(solution[i])
 
         final_solution_keys = []
+        ind = []
+        index_tracker = 0
         true_solutions = 0
 
         for key in solution_keys:
             if final_solution.get(key):
                 true_solutions += 1
+                ind.append(index_tracker)
                 final_solution_keys.append(key)
 
-        all_solution_index = []
-        for j in final_solution_keys:
-            final_key_index = int(str(j)[-1])
-            all_solution_index.append(final_key_index)
+            index_tracker += 1
+
+        print(final_solution_keys)
+        print(ind)
 
         print("\n------------------------------------------")
         input("\nPress any key to contiue...")
@@ -682,7 +691,7 @@ def main():
         os.system(clearTermial)
 
         print("--- Results ---\n")
-        print("Total number of trips possible meeting test case: " + str(true_solutions))
+        print("Total number of trips possible meeting the user inputs: " + str(true_solutions))
 
         if true_solutions != 0:
 
@@ -696,11 +705,13 @@ def main():
                 else:
                     rando = random.randint(0, (true_solutions - 1))
 
-                    print("Currently showing trip index: " + str(rando) + "\n")
-                    print(test_1[rando])
+                    ans_index = ind[rando]
+
+                    print("Currently showing trip index: " + str(ans_index) + "\n")
+                    print(test_1[ans_index])
 
         else:
-            print("No possible trips were found for the test case.")
+            print("No possible trips were found meeting user's needs.")
 
 
 main()
