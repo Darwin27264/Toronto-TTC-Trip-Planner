@@ -55,7 +55,7 @@ def start_program():
     end_dest_info = user_input.ending_stop
 
     desired_departure_time = time_to_int(time_to_string(user_input.starting_stop.arrive_time))
-    desired_arrival_time = time_to_int(time_to_string(user_input.ending_time.arrive_time))
+    desired_arrival_time = time_to_int(time_to_string(user_input.ending_stop.arrive_time))
 
     all_trips = get_trips(user_input)
     print(all_trips)
